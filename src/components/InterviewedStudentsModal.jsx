@@ -253,7 +253,7 @@ const InterviewedStudentsModal = ({
                   border: "1px solid #e5e7eb",
                 }}
               >
-                {formatDate(selectedStudent.interviewDate) || "Not set"}
+                {formatDate(selectedStudent.selectDate) || "Not set"}
               </div>
             </div>
             <div>
@@ -276,7 +276,7 @@ const InterviewedStudentsModal = ({
                   border: "1px solid #e5e7eb",
                 }}
               >
-                {formatTime(selectedStudent.interviewTime) || "Not set"}
+                {formatTime(selectedStudent.selectTime) || "Not set"}
               </div>
             </div>
           </div>
