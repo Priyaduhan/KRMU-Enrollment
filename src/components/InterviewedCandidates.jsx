@@ -7,6 +7,7 @@ const InterviewedCandidates = ({
   handleViewClick,
   closeModal,
   isModalOpen,
+  limit,
   setIsModalOpen,
 }) => {
   const truncateString = (str, maxLength) => {
@@ -75,7 +76,7 @@ const InterviewedCandidates = ({
                 </td>
               </tr>
             ) : (
-              students.map((student) => (
+              students.slice(limit).map((student) => (
                 <tr
                   key={student.id}
                   className="hover:bg-gray-50 transition-colors duration-200"

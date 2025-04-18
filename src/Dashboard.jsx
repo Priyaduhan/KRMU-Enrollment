@@ -180,6 +180,7 @@ const Dashboard = () => {
                 closeModal={closeModal}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
+                limit={5}
               />
             </section>
 
@@ -194,12 +195,13 @@ const Dashboard = () => {
                 closeModal={closeInterviewedModal}
                 isModalOpen={isInterviewedModalOpen}
                 setIsModalOpen={setIsInterviewedModalOpen}
+                limit={5}
               />
             </section>
 
-            <section style={{ marginTop: "35px" }}>
+            {/* <section style={{ marginTop: "35px" }}>
               <TeachersTable teachers={teachers} />
-            </section>
+            </section> */}
           </>
         );
       case "students":
@@ -218,7 +220,14 @@ const Dashboard = () => {
       case "Teachers":
         return (
           <section style={{ marginTop: "10px" }}>
-            <TeachersTable teachers={teachers} />
+            <InterviewedCandidates
+              students={students}
+              onUpdateStudent={handleUpdateStudent}
+              handleViewClick={handleInterviewedViewClick}
+              closeModal={closeInterviewedModal}
+              isModalOpen={isInterviewedModalOpen}
+              setIsModalOpen={setIsInterviewedModalOpen}
+            />
           </section>
         );
       case "Logout":
@@ -272,13 +281,12 @@ const Dashboard = () => {
               onClick={() => setActiveNav("students")}
             />
             <NavItem
-              icon={<BookOpen size={19} />}
-              label="Teachers"
+              icon={<UserCheck size={19} />}
+              label="Interviewed"
               active={activeNav === "Teachers"}
               onClick={() => setActiveNav("Teachers")}
             />
-            <NavItem icon={<Calendar size={19} />} label="Schedule" />
-            <NavItem icon={<Settings size={19} />} label="Settings" />
+
             <NavItem
               icon={<LogOut size={19} />}
               label="Logout"

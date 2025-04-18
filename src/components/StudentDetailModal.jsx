@@ -422,7 +422,7 @@ const StudentDetailModal = ({
               style={{
                 marginLeft: "12px",
                 display: "flex",
-                justifyContent: "end",
+                justifyContent: "space-around",
                 width: "10%",
                 padding: "10px 17px",
                 marginTop: "10px",
