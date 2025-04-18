@@ -76,79 +76,81 @@ const StudentTable = ({
                 </td>
               </tr>
             ) : (
-              students.slice(limit).map((student) => (
-                <tr
-                  key={student.id}
-                  className="hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {student.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {truncateString(student.name, 17)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {truncateString(student.course, 25)}
-                  </td>
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
-                    style={{
-                      color: student.mcq != 0 ? "#16a34a" : "#dc2626",
-                    }}
+              students
+                .slice(Math.max(students.length - limit, 0))
+                .map((student) => (
+                  <tr
+                    key={student.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
                   >
-                    {student.mcq == 0 ? "Pending" : student.mcq}
-                  </td>
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
-                    style={{
-                      color:
-                        student.zoomStatus == "Added" ? "#16a34a" : "#dc2626",
-                    }}
-                  >
-                    {student.zoomStatus}
-                  </td>
-                  <td
-                    style={{
-                      padding: "16px 0px",
-                      whiteSpace: "nowrap",
-                      fontSize: "14px",
-                      color: "#4b5563",
-                      textAlign: "right",
-                    }}
-                  >
-                    <button
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {student.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {truncateString(student.name, 17)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {truncateString(student.course, 25)}
+                    </td>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
-                        color: "#2563eb",
-                        marginRight: "12px",
-                        transition: "color 0.2s",
-                        background: "",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "10px 20px",
+                        color: student.mcq != 0 ? "#16a34a" : "#dc2626",
                       }}
-                      onMouseOver={(e) => (e.target.style.color = "#1e40af")}
-                      onMouseOut={(e) => (e.target.style.color = "#2563eb")}
-                      onClick={() => handleViewClick(student)}
                     >
-                      View
-                    </button>
-                    <button
+                      {student.mcq == 0 ? "Pending" : student.mcq}
+                    </td>
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
-                        color: "#16a34a",
-                        transition: "color 0.2s",
-                        background: "",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "10px 20px",
+                        color:
+                          student.zoomStatus == "Added" ? "#16a34a" : "#dc2626",
                       }}
-                      onMouseOver={(e) => (e.target.style.color = "#166534")}
-                      onMouseOut={(e) => (e.target.style.color = "#16a34a")}
                     >
-                      Start Interview
-                    </button>
-                  </td>
-                </tr>
-              ))
+                      {student.zoomStatus}
+                    </td>
+                    <td
+                      style={{
+                        padding: "16px 0px",
+                        whiteSpace: "nowrap",
+                        fontSize: "14px",
+                        color: "#4b5563",
+                        textAlign: "right",
+                      }}
+                    >
+                      <button
+                        style={{
+                          color: "#2563eb",
+                          marginRight: "12px",
+                          transition: "color 0.2s",
+                          background: "",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "10px 20px",
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = "#1e40af")}
+                        onMouseOut={(e) => (e.target.style.color = "#2563eb")}
+                        onClick={() => handleViewClick(student)}
+                      >
+                        View
+                      </button>
+                      <button
+                        style={{
+                          color: "#16a34a",
+                          transition: "color 0.2s",
+                          background: "",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: "10px 20px",
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = "#166534")}
+                        onMouseOut={(e) => (e.target.style.color = "#16a34a")}
+                      >
+                        Start Interview
+                      </button>
+                    </td>
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
