@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useNavigate } from "react-router-dom";
 
-import StudentTable from "./components/StudentTable";
 import TeachersTable from "./components/TeachersTable";
 import NavItem from "./components/ui/NavItem";
-import StatusCard from "./components/StatusCard";
+import StatusCard from "./components/ui/StatusCard";
 import uniLogo from "./assets/uni-logo.png";
-import StudentDetailModal from "./components/StudentDetailModal";
 
-import { teacherData, stats } from "./components/constants/constantData";
+import { stats } from "./components/constants/constantData";
 
 import {
   Users,
@@ -21,19 +19,16 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import InterviewedCandidates from "./components/InterviewedCandidates";
-import InterviewedStudentsModal from "./components/InterviewedStudentsModal";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TeacherTableModal from "./components/TeacherTableModal";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
 
   // State to store student data
   const [students, setStudents] = useState([]);
-  const [teachers] = useState(teacherData);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewedModalOpen, setIsInterviewedModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedStudentUpdateFormat, setSelectedStudentUpdateFormat] =
@@ -41,26 +36,12 @@ const TeacherDashboard = () => {
 
   const [activeNav, setActiveNav] = useState("dashboard");
 
-  const handleViewClick = (student) => {
-    // Find the selected student from the students array
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const currentStudent = storedStudents.find((s) => s.id === student.id);
-    setSelectedStudent(currentStudent);
-    setSelectedStudentUpdateFormat(student);
-    setIsModalOpen(true);
-  };
-
   const handleInterviewedViewClick = (student) => {
     const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
     const currentStudent = storedStudents.find((s) => s.id === student.id);
     setSelectedStudent(currentStudent);
     setSelectedStudentUpdateFormat(student);
     setIsInterviewedModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedStudent(null);
   };
 
   const closeInterviewedModal = () => {
@@ -79,9 +60,10 @@ const TeacherDashboard = () => {
       zoomStatus: student.url ? "Added" : "Pending", // Check if URL exists
       teacherAssigned: "Assigned", // Default to "Pending" (you can update this logic as needed)
       mcq: student.mcq || 0, // Use the MCQ value from localStorage
+      technicalStatus: student.technicalStatus,
     }));
     setStudents(formattedStudents);
-  }, [isModalOpen, isInterviewedModalOpen]);
+  }, [isInterviewedModalOpen]);
 
   // Function to update student data
   const handleUpdateStudent = (updatedStudent) => {
@@ -98,25 +80,7 @@ const TeacherDashboard = () => {
     };
     handleUpdateStudent(updatedStudent);
     closeInterviewedModal();
-    toast.success("Candidate acceptance email sent successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
-
-  const handleReject = () => {
-    const updatedStudent = {
-      ...selectedStudent,
-      status: "Rejected",
-    };
-    handleUpdateStudent(updatedStudent);
-    closeInterviewedModal();
-    toast.success("Candidate rejection email sent successfully!", {
+    toast.success("Candidate interview status update successfully!", {
       position: "top-right",
       autoClose: 3000,
       hideProgressBar: false,
@@ -141,7 +105,7 @@ const TeacherDashboard = () => {
                 style={{
                   display: "flex",
                   flexDirection: "row",
-                  justifyContent: "space-around",
+                  justifyContent: "space-between",
                   marginTop: "25px",
                 }}
               >
@@ -154,7 +118,14 @@ const TeacherDashboard = () => {
                 />
                 <StatusCard
                   icon={<Clock className="text-yellow-600" size={20} />}
-                  title="Waiting for Interview"
+                  title="Technical Candidates"
+                  value={stats.waitingForInterview}
+                  bgColor="bg-yellow-50"
+                  textColor="text-yellow-600"
+                />
+                <StatusCard
+                  icon={<Clock className="text-yellow-600" size={20} />}
+                  title="General Candidates"
                   value={stats.waitingForInterview}
                   bgColor="bg-yellow-50"
                   textColor="text-yellow-600"
@@ -166,13 +137,15 @@ const TeacherDashboard = () => {
               className="my-8"
               style={{ marginTop: "35px", width: "100%" }}
             >
-              <StudentTable
+              <TeachersTable
                 students={students}
                 onUpdateStudent={handleUpdateStudent}
-                handleViewClick={handleViewClick}
-                closeModal={closeModal}
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen}
+                handleViewClick={handleInterviewedViewClick}
+                closeModal={closeInterviewedModal}
+                isModalOpen={isInterviewedModalOpen}
+                setIsModalOpen={setIsInterviewedModalOpen}
+                limit={5}
+                interviewtype="Technical"
               />
             </section>
 
@@ -180,38 +153,45 @@ const TeacherDashboard = () => {
               className="my-8"
               style={{ marginTop: "35px", width: "100%" }}
             >
-              <InterviewedCandidates
+              <TeachersTable
                 students={students}
                 onUpdateStudent={handleUpdateStudent}
                 handleViewClick={handleInterviewedViewClick}
                 closeModal={closeInterviewedModal}
                 isModalOpen={isInterviewedModalOpen}
                 setIsModalOpen={setIsInterviewedModalOpen}
+                limit={5}
+                interviewtype="General"
               />
-            </section>
-
-            <section style={{ marginTop: "35px" }}>
-              <TeachersTable teachers={teachers} />
             </section>
           </>
         );
       case "students":
         return (
           <section className="my-8" style={{ marginTop: "10px" }}>
-            <StudentTable
+            <TeachersTable
               students={students}
               onUpdateStudent={handleUpdateStudent}
-              handleViewClick={handleViewClick}
-              closeModal={closeModal}
-              isModalOpen={isModalOpen}
-              setIsModalOpen={setIsModalOpen}
+              handleViewClick={handleInterviewedViewClick}
+              closeModal={closeInterviewedModal}
+              isModalOpen={isInterviewedModalOpen}
+              setIsModalOpen={setIsInterviewedModalOpen}
+              interviewtype="Technical"
             />
           </section>
         );
       case "Teachers":
         return (
           <section style={{ marginTop: "10px" }}>
-            <TeachersTable teachers={teachers} />
+            <TeachersTable
+              students={students}
+              onUpdateStudent={handleUpdateStudent}
+              handleViewClick={handleInterviewedViewClick}
+              closeModal={closeInterviewedModal}
+              isModalOpen={isInterviewedModalOpen}
+              setIsModalOpen={setIsInterviewedModalOpen}
+              interviewtype="General"
+            />
           </section>
         );
       case "Logout":
@@ -270,8 +250,7 @@ const TeacherDashboard = () => {
               active={activeNav === "Teachers"}
               onClick={() => setActiveNav("Teachers")}
             />
-            <NavItem icon={<Calendar size={19} />} label="Schedule" />
-            <NavItem icon={<Settings size={19} />} label="Settings" />
+
             <NavItem
               icon={<LogOut size={19} />}
               label="Logout"
@@ -293,20 +272,12 @@ const TeacherDashboard = () => {
       >
         <main>{renderContent()}</main>
       </div>
-      <StudentDetailModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        selectedStudent={selectedStudent}
-        onUpdateStudent={handleUpdateStudent}
-        selectedStudentUpdateFormat={selectedStudentUpdateFormat}
-      />
-      <InterviewedStudentsModal
+      <TeacherTableModal
         isOpen={isInterviewedModalOpen}
         onClose={closeInterviewedModal}
         selectedStudent={selectedStudent}
         onUpdateStudent={handleUpdateStudent}
         selectedStudentUpdateFormat={selectedStudentUpdateFormat}
-        handleReject={handleReject}
         handleAccept={handleAccept}
       />
     </div>

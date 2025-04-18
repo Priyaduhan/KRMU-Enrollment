@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import { teacherData } from "./constants/constantData";
+import React, { useEffect, useRef, useState } from "react";
 
-const InterviewedStudentsModal = ({
+const TeacherTableModal = ({
   isOpen,
   onClose,
   selectedStudent,
@@ -11,6 +10,18 @@ const InterviewedStudentsModal = ({
   handleReject,
 }) => {
   const modalRef = useRef(null);
+  const [editStatus, setEditStatus] = useState({
+    technicalStatus: selectedStudent?.teachnicalStatus || "",
+    generalStatus: selectedStudent?.generalStatus || "",
+  });
+
+  // Update local state when selectedStudent changes
+  useEffect(() => {
+    setEditStatus({
+      technicalStatus: selectedStudent?.teachnicalStatus || "",
+      generalStatus: selectedStudent?.generalStatus || "",
+    });
+  }, [selectedStudent]);
 
   // Format ISO date to DD-MM-YYYY
   const formatDate = (isoDate) => {
@@ -29,6 +40,14 @@ const InterviewedStudentsModal = ({
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
+  };
+
+  // Handle status change
+  const handleStatusChange = (field, value) => {
+    setEditStatus((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   // Handle outside clicks
@@ -393,15 +412,17 @@ const InterviewedStudentsModal = ({
           {/* Teacher Rows */}
           {[
             {
+              type: "technical",
               label: "Technical Round",
               value: selectedStudent.teachnicalTeacher || "Pending",
-              status: selectedStudent.teachnicalStatus,
+              status: editStatus.technicalStatus,
               highlight: selectedStudent.teachnicalTeacher,
             },
             {
+              type: "general",
               label: "General Round",
               value: selectedStudent.generalTeacher || "Pending",
-              status: selectedStudent.generalStatus,
+              status: editStatus.generalStatus,
               highlight: selectedStudent.generalTeacher,
             },
           ].map((teacher, index) => (
@@ -451,8 +472,18 @@ const InterviewedStudentsModal = ({
                 >
                   {teacher.label} Status
                 </label>
-                <div
+                <select
+                  value={teacher.status}
+                  onChange={(e) =>
+                    handleStatusChange(
+                      teacher.type === "technical"
+                        ? "technicalStatus"
+                        : "generalStatus",
+                      e.target.value
+                    )
+                  }
                   style={{
+                    width: "100%",
                     padding: "0.4rem",
                     borderRadius: "0.25rem",
                     border: teacher.highlight
@@ -460,10 +491,14 @@ const InterviewedStudentsModal = ({
                       : "1px solid #e5e7eb",
                     backgroundColor: teacher.highlight ? "#f0fdf4" : "#f9fafb",
                     minHeight: "36px",
+                    outline: "none",
+                    cursor: "pointer",
                   }}
                 >
-                  {teacher.status || "Pending"}
-                </div>
+                  <option value="Pending">Pending</option>
+                  <option value="Pass">Pass</option>
+                  <option value="Fail">Fail</option>
+                </select>
               </div>
             </div>
           ))}
@@ -474,34 +509,21 @@ const InterviewedStudentsModal = ({
               display: "flex",
               justifyContent: "flex-end",
               gap: "0.75rem",
-              paddingTop: "0.75rem",
-              marginTop: "0.5rem",
+              marginTop: "1rem",
             }}
           >
             <button
-              onClick={handleReject}
-              style={{
-                padding: "0.4rem 1.25rem",
-                backgroundColor: "#dc2626",
-                color: "white",
-                borderRadius: "0.375rem",
-                border: "none",
-                cursor: "pointer",
-                transition: "background-color 0.2s",
+              onClick={() => {
+                const updatedStudent = {
+                  ...selectedStudent,
+                  teachnicalStatus: editStatus.technicalStatus,
+                  generalStatus: editStatus.generalStatus,
+                };
+                onUpdateStudent(updatedStudent);
+                handleAccept();
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#b91c1c")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#dc2626")
-              }
-            >
-              Reject
-            </button>
-            <button
-              onClick={handleAccept}
               style={{
-                padding: "0.4rem 1.25rem",
+                padding: "0.6rem 1.25rem",
                 backgroundColor: "#16a34a",
                 color: "white",
                 borderRadius: "0.375rem",
@@ -516,7 +538,7 @@ const InterviewedStudentsModal = ({
                 (e.currentTarget.style.backgroundColor = "#16a34a")
               }
             >
-              Accept
+              Update Status
             </button>
           </div>
         </div>
@@ -525,4 +547,4 @@ const InterviewedStudentsModal = ({
   );
 };
 
-export default InterviewedStudentsModal;
+export default TeacherTableModal;

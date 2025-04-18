@@ -76,6 +76,8 @@ const StudentForm = () => {
           generalTeacher: "",
           teachnicalTeacher: "",
           school: values.schoolName,
+          generalStatus: "Pending",
+          technicalStatus: "Pending",
           ...values,
         };
 

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
-// import "signup.css";
 import googleimage from "./assets/google.svg";
 import appleimage from "./assets/apple.svg";
 import uniLogo from "./assets/uni-logo.png";
@@ -166,10 +165,7 @@ const SignUp = () => {
               </button>
             </form>
             <p className="signup-text">
-              Don't have an account?{" "}
-              <a href="#" onClick={toggleForm}>
-                Signup now
-              </a>
+              Don't have an account? <a onClick={toggleForm}>Signup now</a>
             </p>
           </>
         ) : (
@@ -243,10 +239,7 @@ const SignUp = () => {
               </button>
             </form>
             <p className={`signup-text ${isLogin ? "" : "flipped"}`}>
-              Already have an account?{" "}
-              <a href="#" onClick={toggleForm}>
-                Login now
-              </a>
+              Already have an account? <a onClick={toggleForm}>Login now</a>
             </p>
           </>
         )}

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import StudentTable from "./components/StudentTable";
 import TeachersTable from "./components/TeachersTable";
 import NavItem from "./components/ui/NavItem";
-import StatusCard from "./components/StatusCard";
+import StatusCard from "./components/ui/StatusCard";
 import uniLogo from "./assets/uni-logo.png";
 import StudentDetailModal from "./components/StudentDetailModal";
 
