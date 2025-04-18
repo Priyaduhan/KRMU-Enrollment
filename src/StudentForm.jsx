@@ -5,6 +5,8 @@ import DatePicker from "react-datepicker";
 import uniLogo from "./assets/uni-logo.png";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
+import { degreeOptions } from "./components/constants/degreeData";
+import { schoolsData } from "./components/constants/schoolData";
 import {
   TextField,
   MenuItem,
@@ -303,37 +305,48 @@ const StudentForm = () => {
                   formik.touched.courseName && Boolean(formik.errors.courseName)
                 }
               >
-                <MenuItem value="Computer Science">Computer Science</MenuItem>
-                <MenuItem value="Data Science">Data Science</MenuItem>
-                <MenuItem value="Web Development">Web Development</MenuItem>
-                <MenuItem value="Machine Learning">Machine Learning</MenuItem>
-                <MenuItem value="Artificial Intelligence">
-                  Artificial Intelligence
-                </MenuItem>
+                {degreeOptions.map((course) => (
+                  <MenuItem key={course.value} value={course.value}>
+                    {course.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
 
           {/* School Name - New Field */}
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              id="schoolName"
-              name="schoolName"
-              label="School Name"
-              value={formik.values.schoolName}
-              onChange={formik.handleChange}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-              }}
-              onBlur={formik.handleBlur}
-              error={
-                formik.touched.schoolName && Boolean(formik.errors.schoolName)
-              }
-              helperText={formik.touched.schoolName && formik.errors.schoolName}
-            />
+            <FormControl fullWidth>
+              <InputLabel id="schoolName-label">School Name</InputLabel>
+              <Select
+                labelId="schoolName-label"
+                id="schoolName"
+                name="schoolName"
+                value={formik.values.schoolName}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      formik.touched.schoolName && formik.errors.schoolName
+                        ? "#d32f2f"
+                        : "rgba(0, 0, 0, 0.23)",
+                  },
+                }}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.schoolName && Boolean(formik.errors.schoolName)
+                }
+              >
+                {schoolsData.map((school) => (
+                  <MenuItem key={school.value} value={school.value}>
+                    {school.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
 
           {/* State and City */}
