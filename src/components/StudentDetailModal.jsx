@@ -1,30 +1,121 @@
 import React, { useEffect, useRef, useState } from "react";
-import { teacherData } from "./constants/constantData";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "./../api";
 
 const StudentDetailModal = ({
   isOpen,
   onClose,
-  selectedStudent,
-  onUpdateStudent,
-  selectedStudentUpdateFormat,
+  student,
+  onUpdate,
+  teachersList,
 }) => {
   const modalRef = useRef(null);
-  const [zoomUrl, setZoomUrl] = useState(selectedStudent?.url || "");
-  const [mcqTest, setMCQTest] = useState(
-    selectedStudent?.mcq?.toString() || ""
-  );
-  const [teachnicalInterview, setTeachnicalInterview] = useState(
-    selectedStudent?.teachnicalTeacher || ""
-  );
-  const [generalInterview, setGeneralInterview] = useState(
-    selectedStudent?.generalTeacher || ""
-  );
-  const [error, setError] = useState({ mcq: null, url: null });
+
+  const [formData, setFormData] = useState({
+    zoomLink: "",
+    mcqScore: 0,
+    technicalTeacher: "",
+    generalTeacher: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && student) {
+      setFormData({
+        zoomLink: student.zoomLink || "",
+        mcqScore: student.mcqScore || 0,
+        technicalTeacher: student.technicalTeacher || "",
+        generalTeacher: student.generalTeacher || "",
+      });
+
+      // // Fetch teachers from backend
+      // const fetchTeachers = async () => {
+      //   try {
+      //     const { data } = await API.get("/users/teachers");
+      //     setTeachers(data.teachers);
+      //   } catch (error) {
+      //     toast.error("Failed to load teachers");
+      //   }
+      // };
+      // fetchTeachers();
+    }
+  }, [isOpen, student]);
+
+  // const [zoomUrl, setZoomUrl] = useState(selectedStudent?.url || "");
+  // const [mcqTest, setMCQTest] = useState(
+  //   selectedStudent?.mcq?.toString() || ""
+  // );
+  // const [teachnicalInterview, setTeachnicalInterview] = useState(
+  //   selectedStudent?.teachnicalTeacher || ""
+  // );
+  // const [generalInterview, setGeneralInterview] = useState(
+  //   selectedStudent?.generalTeacher || ""
+  // );
+  // const [error, setError] = useState({ mcq: null, url: null });
+
   const [expandedRow, setExpandedRow] = useState(null);
 
-  // Format ISO date to DD-MM-YYYY
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate Teams URL
+    if (
+      !formData.zoomLink.startsWith(
+        "https://teams.microsoft.com/l/meetup-join/"
+      )
+    ) {
+      newErrors.zoomLink =
+        "URL must start with https://teams.microsoft.com/l/meetup-join/";
+    }
+
+    // Validate MCQ score
+    if (
+      formData.mcqScore <= 0 ||
+      formData.mcqScore > 100 ||
+      isNaN(formData.mcqScore)
+    ) {
+      newErrors.mcqScore = "MCQ score must be between 0 and 100";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      await API.patch(`/students/${student._id}`, {
+        zoomLink: formData.zoomLink,
+        mcqScore: Number(formData.mcqScore),
+        technicalTeacher: formData.technicalTeacher,
+        generalTeacher: formData.generalTeacher,
+      });
+
+      toast.success("Student updated successfully!");
+      onUpdate(); // Refresh the student list
+      onClose(); // Close the modal
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update student");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log(errors);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // // Format ISO date to DD-MM-YYYY
   const formatDate = (isoDate) => {
     if (!isoDate) return "Not set";
     const date = new Date(isoDate);
@@ -44,20 +135,21 @@ const StudentDetailModal = ({
   };
 
   // Handle outside clicks
+
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setError("");
-        setZoomUrl("");
-        setMCQTest(null);
+        // setError("");
+        // setZoomUrl("");
+        // setMCQTest(null);
         onClose();
       }
     };
 
     if (isOpen) {
       document.addEventListener("mousedown", handleOutsideClick);
-      setZoomUrl(selectedStudent?.url || zoomUrl);
-      setMCQTest(selectedStudent?.mcq?.toString() || mcqTest);
+      // setZoomUrl(selectedStudent?.url || zoomUrl);
+      // setMCQTest(selectedStudent?.mcq?.toString() || mcqTest);
     }
 
     return () => {
@@ -65,81 +157,81 @@ const StudentDetailModal = ({
     };
   }, [isOpen, onClose]);
 
-  const validateTeamsUrl = (url) => {
-    const teamsUrlPattern =
-      /^https:\/\/teams\.microsoft\.com\/l\/meetup-join\//;
-    if (!teamsUrlPattern.test(url)) {
-      setError((errors) => ({
-        ...errors,
-        url: "Microsoft Teams URL must start with https://teams.microsoft.com/l/meetup-join/",
-      }));
-      return false;
-    }
-    setError((errors) => ({ ...errors, url: null }));
-    return true;
-  };
+  // const validateTeamsUrl = (url) => {
+  //   const teamsUrlPattern =
+  //     /^https:\/\/teams\.microsoft\.com\/l\/meetup-join\//;
+  //   if (!teamsUrlPattern.test(url)) {
+  //     setError((errors) => ({
+  //       ...errors,
+  //       url: "Microsoft Teams URL must start with https://teams.microsoft.com/l/meetup-join/",
+  //     }));
+  //     return false;
+  //   }
+  //   setError((errors) => ({ ...errors, url: null }));
+  //   return true;
+  // };
 
-  const validateMCQTestMark = (mark) => {
-    if (typeof mark !== "number" || isNaN(mark) || mark < 1 || mark > 100) {
-      setError((errors) => ({
-        ...errors,
-        mcq: "MCQ test marks must be between 1 and 100.",
-      }));
-      return false;
-    }
-    setError((errors) => ({ ...errors, mcq: null }));
-    return true;
-  };
+  // const validateMCQTestMark = (mark) => {
+  //   if (typeof mark !== "number" || isNaN(mark) || mark < 1 || mark > 100) {
+  //     setError((errors) => ({
+  //       ...errors,
+  //       mcq: "MCQ test marks must be between 1 and 100.",
+  //     }));
+  //     return false;
+  //   }
+  //   setError((errors) => ({ ...errors, mcq: null }));
+  //   return true;
+  // };
 
-  const handleSubmit = () => {
-    const isTeamUrlValid = validateTeamsUrl(zoomUrl);
-    const mark = parseFloat(mcqTest);
-    const isMCQTestValid = validateMCQTestMark(mark);
+  // const handleSubmit = () => {
+  //   const isTeamUrlValid = validateTeamsUrl(zoomUrl);
+  //   const mark = parseFloat(mcqTest);
+  //   const isMCQTestValid = validateMCQTestMark(mark);
 
-    if (isTeamUrlValid && isMCQTestValid) {
-      try {
-        const updatedStudent = {
-          ...selectedStudent,
-          url: zoomUrl,
-          mcq: mark,
-          generalTeacher: generalInterview,
-          teachnicalTeacher: teachnicalInterview,
-          zoomStatus: zoomUrl ? "Added" : "Pending",
-        };
+  //   if (isTeamUrlValid && isMCQTestValid) {
+  //     try {
+  //       const updatedStudent = {
+  //         ...selectedStudent,
+  //         url: zoomUrl,
+  //         mcq: mark,
+  //         generalTeacher: generalInterview,
+  //         teachnicalTeacher: teachnicalInterview,
+  //         zoomStatus: zoomUrl ? "Added" : "Pending",
+  //       };
 
-        const storedStudents =
-          JSON.parse(localStorage.getItem("students")) || [];
-        const updatedStudents = storedStudents.map((student) =>
-          student.id === updatedStudent.id ? updatedStudent : student
-        );
-        localStorage.setItem("students", JSON.stringify(updatedStudents));
-        onUpdateStudent(updatedStudent);
+  //       const storedStudents =
+  //         JSON.parse(localStorage.getItem("students")) || [];
+  //       const updatedStudents = storedStudents.map((student) =>
+  //         student.id === updatedStudent.id ? updatedStudent : student
+  //       );
+  //       localStorage.setItem("students", JSON.stringify(updatedStudents));
+  //       onUpdateStudent(updatedStudent);
 
-        toast.success("Student details updated successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+  //       toast.success("Student details updated successfully!", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
 
-        // onClose();
-      } catch (error) {
-        toast.error("Failed to update student details", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        console.error("Error updating student:", error);
-      }
-    }
-  };
+  //       // onClose();
+  //     } catch (error) {
+  //       toast.error("Failed to update student details", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //       console.error("Error updating student:", error);
+  //     }
+  //   }
+  // };
 
   const handleCellClick = (content, index) => {
     setExpandedRow(expandedRow === index ? null : index);
@@ -152,7 +244,8 @@ const StudentDetailModal = ({
       : text;
   };
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
+  if (!isOpen || !student) return null;
 
   return (
     <div
@@ -169,7 +262,6 @@ const StudentDetailModal = ({
         zIndex: 1000,
       }}
     >
-      <ToastContainer />
       <div
         ref={modalRef}
         style={{
@@ -185,9 +277,6 @@ const StudentDetailModal = ({
         {/* Close Button */}
         <button
           onClick={() => {
-            setZoomUrl("");
-            setError("");
-            setMCQTest(0);
             onClose();
           }}
           style={{
@@ -243,22 +332,25 @@ const StudentDetailModal = ({
             >
               <input
                 type="text"
-                id="zoomUrl"
-                value={zoomUrl}
-                onChange={(e) => setZoomUrl(e.target.value)}
+                name="zoomLink"
+                value={formData.zoomLink}
+                onChange={handleChange}
+                className={errors.zoomLink ? "input-error" : ""}
                 style={{
                   width: "100%",
                   padding: "8px 12px",
                   borderRadius: "6px",
-                  border: `1px solid ${error.url ? "#dc2626" : "#d1d5db"}`,
+                  border: `1px solid ${
+                    errors.zoomLink ? "#dc2626" : "#d1d5db"
+                  }`,
                   outline: "none",
                   fontSize: "14px",
                   color: "#374151",
                 }}
-                placeholder="https://teams.microsoft.com/..."
+                placeholder="https://teams.microsoft.com/l/meetup-join/..."
               />
-              {error.url && (
-                <p
+              {errors.zoomLink && (
+                <span
                   style={{
                     color: "#dc2626",
                     fontSize: "12px",
@@ -266,8 +358,8 @@ const StudentDetailModal = ({
                     textAlign: "left",
                   }}
                 >
-                  {error.url}
-                </p>
+                  {errors.zoomLink}
+                </span>
               )}
             </div>
           </div>
@@ -295,35 +387,28 @@ const StudentDetailModal = ({
               }}
             >
               <input
-                type="text"
-                id="mcqTest"
-                value={mcqTest}
-                onChange={(e) => {
-                  setMCQTest(e.target.value);
-                  setError((errors) => ({ ...errors, mcq: null }));
-                }}
-                onBlur={() => {
-                  const mark = parseFloat(mcqTest);
-                  if (!validateMCQTestMark(mark)) {
-                    setError((errors) => ({
-                      ...errors,
-                      mcq: "MCQ Test Mark must be between 1 and 100.",
-                    }));
-                  }
-                }}
+                type="number"
+                name="mcqScore"
+                value={formData.mcqScore}
+                onChange={handleChange}
+                min="0"
+                max="100"
+                className={errors.mcqScore ? "input-error" : ""}
                 style={{
                   width: "100%",
                   padding: "8px 12px",
                   borderRadius: "6px",
-                  border: `1px solid ${error.mcq ? "#dc2626" : "#d1d5db"}`,
+                  border: `1px solid ${
+                    errors.mcqScore ? "#dc2626" : "#d1d5db"
+                  }`,
                   outline: "none",
                   fontSize: "14px",
                   color: "#374151",
                 }}
                 placeholder="Enter MCQ Test Mark"
               />
-              {error.mcq && (
-                <p
+              {errors.mcqScore && (
+                <span
                   style={{
                     color: "#dc2626",
                     fontSize: "12px",
@@ -331,8 +416,8 @@ const StudentDetailModal = ({
                     textAlign: "left",
                   }}
                 >
-                  {error.mcq}
-                </p>
+                  {errors.mcqScore}
+                </span>
               )}
             </div>
           </div>
@@ -353,8 +438,9 @@ const StudentDetailModal = ({
             </label>
             <select
               id="technicalInterviewStatus"
-              value={teachnicalInterview}
-              onChange={(e) => setTeachnicalInterview(e.target.value)}
+              value={formData.technicalTeacher}
+              name="technicalTeacher"
+              onChange={handleChange}
               style={{
                 width: "100%",
                 padding: "8px 12px",
@@ -366,9 +452,9 @@ const StudentDetailModal = ({
               }}
             >
               <option value="">Select Teacher</option>
-              {teacherData.map((val, key) => (
-                <option key={key} value={val.name}>
-                  {val.name}
+              {teachersList.map((val, key) => (
+                <option key={key} value={val.username}>
+                  {val.username}
                 </option>
               ))}
             </select>
@@ -390,8 +476,9 @@ const StudentDetailModal = ({
             </label>
             <select
               id="generalInterviewStatus"
-              value={generalInterview}
-              onChange={(e) => setGeneralInterview(e.target.value)}
+              value={formData.generalTeacher}
+              onChange={handleChange}
+              name="generalTeacher"
               style={{
                 width: "100%",
                 padding: "8px 12px",
@@ -403,9 +490,9 @@ const StudentDetailModal = ({
               }}
             >
               <option value="">Select Teacher</option>
-              {teacherData.map((val, key) => (
-                <option key={key} value={val.name}>
-                  {val.name}
+              {teachersList.map((val, key) => (
+                <option key={key} value={val.username}>
+                  {val.username}
                 </option>
               ))}
             </select>
@@ -438,13 +525,13 @@ const StudentDetailModal = ({
               onMouseOver={(e) => (e.target.style.backgroundColor = "#1e40af")}
               onMouseOut={(e) => (e.target.style.backgroundColor = "#2563eb")}
             >
-              Update
+              {loading ? "Updating..." : "Update"}
             </button>
           </div>
         </div>
 
         {/* Student Details Table */}
-        {selectedStudent && (
+        {student && (
           <div style={{ marginTop: "40px", marginBottom: "30px" }}>
             <table
               style={{
@@ -500,14 +587,14 @@ const StudentDetailModal = ({
               <tbody>
                 <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
                   {[
-                    selectedStudentUpdateFormat.id,
-                    selectedStudentUpdateFormat.name,
-                    selectedStudent.email || "N/A",
-                    selectedStudent.contactNumber || "N/A",
-                    selectedStudentUpdateFormat.course,
-                    selectedStudent.schoolName || "N/A",
-                    formatDate(selectedStudent.selectDate),
-                    formatTime(selectedStudent.selectTime),
+                    student.studentId,
+                    `${student.firstName} ${student.lastName}`,
+                    student.email || "N/A",
+                    student.contactNumber || "N/A",
+                    student.courseName,
+                    student.schoolName || "N/A",
+                    formatDate(student.interviewDate),
+                    formatTime(student.interviewTime),
                   ].map((content, index) => (
                     <td
                       key={index}
@@ -555,14 +642,14 @@ const StudentDetailModal = ({
                       <div style={{ wordBreak: "break-word" }}>
                         {
                           [
-                            selectedStudentUpdateFormat.id,
-                            selectedStudentUpdateFormat.name,
-                            selectedStudent.email || "N/A",
-                            selectedStudent.contactNumber || "N/A",
-                            selectedStudentUpdateFormat.course,
-                            selectedStudent.schoolName || "N/A",
-                            formatDate(selectedStudent.selectDate),
-                            formatTime(selectedStudent.selectTime),
+                            student.studentId,
+                            `${student.firstName} ${student.lastName}`,
+                            student.email || "N/A",
+                            student.contactNumber || "N/A",
+                            student.courseName,
+                            student.schoolName || "N/A",
+                            formatDate(student.interviewDate),
+                            formatTime(student.interviewTime),
                           ][expandedRow]
                         }
                       </div>

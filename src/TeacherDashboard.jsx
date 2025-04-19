@@ -1,24 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useNavigate } from "react-router-dom";
-
+import API from "./api"; // Import your Axios instance
 import TeachersTable from "./components/TeachersTable";
 import NavItem from "./components/ui/NavItem";
 import StatusCard from "./components/ui/StatusCard";
 import uniLogo from "./assets/uni-logo.png";
-
-import { stats } from "./components/constants/constantData";
-
-import {
-  Users,
-  UserCheck,
-  Clock,
-  Home,
-  BookOpen,
-  Calendar,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import { Users, Clock, Home, BookOpen, LogOut } from "lucide-react";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,67 +16,92 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
 
   // State to store student data
-  const [students, setStudents] = useState([]);
+  const [generalStudents, setGeneralStudents] = useState([]);
+  const [technicalStudents, setTechnicalGeneralStudents] = useState([]);
   const [isInterviewedModalOpen, setIsInterviewedModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentUpdateFormat, setSelectedStudentUpdateFormat] =
-    useState(null);
-
   const [activeNav, setActiveNav] = useState("dashboard");
+  const [currentUser, setCurrentUser] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total: 0,
+    technical: 0,
+    general: 0,
+  });
+
+  const fetchCurrentUser = async () => {
+    try {
+      const { data } = await API.get("/auth/me");
+      if (data?.data?.user?.role === "counsellor") {
+        navigate("/teacher/login");
+      }
+      setCurrentUser(data?.data?.user);
+    } catch (error) {
+      toast.error("Failed to fetch user details");
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      const { data } = await API.get("/students");
+      // Extract the data from response
+      const general = data?.data?.generalCandidates || [];
+      const technical = data?.data?.technicalCandidates || [];
+
+      setGeneralStudents(general);
+      setTechnicalGeneralStudents(technical);
+
+      // Update stats state
+      setStats({
+        technical: technical?.length,
+        general: general?.length,
+        total: technical?.length + general?.length,
+      });
+    } catch (error) {
+      toast.error("Failed to fetch students");
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await fetchCurrentUser();
+        await fetchStudents();
+      } catch (error) {
+        toast.error("Error loading data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
+      navigate("/teacher/login");
+    } else {
+      loadData();
+    }
+  }, []);
 
   const handleInterviewedViewClick = (student) => {
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const currentStudent = storedStudents.find((s) => s.id === student.id);
-    setSelectedStudent(currentStudent);
-    setSelectedStudentUpdateFormat(student);
+    setSelectedStudent(student);
     setIsInterviewedModalOpen(true);
   };
 
   const closeInterviewedModal = () => {
     setIsInterviewedModalOpen(false);
     setSelectedStudent(null);
+    fetchStudents();
   };
 
-  // Fetch student data from localStorage on component mount
-  useEffect(() => {
-    console.log("ruuuning");
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const formattedStudents = storedStudents.map((student) => ({
-      id: student.id,
-      name: `${student.firstName} ${student.lastName}`,
-      course: student.courseName,
-      zoomStatus: student.url ? "Added" : "Pending", // Check if URL exists
-      teacherAssigned: "Assigned", // Default to "Pending" (you can update this logic as needed)
-      mcq: student.mcq || 0, // Use the MCQ value from localStorage
-      technicalStatus: student.technicalStatus,
-    }));
-    setStudents(formattedStudents);
-  }, [isInterviewedModalOpen]);
-
-  // Function to update student data
-  const handleUpdateStudent = (updatedStudent) => {
-    const updatedStudents = students.map((student) =>
-      student.id === updatedStudent.id ? updatedStudent : student
-    );
-    setStudents(updatedStudents);
-  };
-
-  const handleAccept = () => {
-    const updatedStudent = {
-      ...selectedStudent,
-      status: "Accepted",
-    };
-    handleUpdateStudent(updatedStudent);
-    closeInterviewedModal();
-    toast.success("Candidate interview status update successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("token");
+      navigate("/teacher/login");
+    } catch (error) {
+      toast.error("Logout failed. Please try again.");
+    }
   };
 
   const renderContent = () => {
@@ -112,21 +125,21 @@ const TeacherDashboard = () => {
                 <StatusCard
                   icon={<Users className="text-blue-600" size={20} />}
                   title="Total Interviews"
-                  value={stats.enrolled}
+                  value={stats.total}
                   bgColor="bg-blue-50"
                   textColor="text-blue-600"
                 />
                 <StatusCard
                   icon={<Clock className="text-yellow-600" size={20} />}
-                  title="Technical Candidates"
-                  value={stats.waitingForInterview}
+                  title="Technical Interviews"
+                  value={stats.technical}
                   bgColor="bg-yellow-50"
                   textColor="text-yellow-600"
                 />
                 <StatusCard
                   icon={<Clock className="text-yellow-600" size={20} />}
-                  title="General Candidates"
-                  value={stats.waitingForInterview}
+                  title="General Interviews"
+                  value={stats.general}
                   bgColor="bg-yellow-50"
                   textColor="text-yellow-600"
                 />
@@ -138,12 +151,8 @@ const TeacherDashboard = () => {
               style={{ marginTop: "35px", width: "100%" }}
             >
               <TeachersTable
-                students={students}
-                onUpdateStudent={handleUpdateStudent}
+                students={technicalStudents}
                 handleViewClick={handleInterviewedViewClick}
-                closeModal={closeInterviewedModal}
-                isModalOpen={isInterviewedModalOpen}
-                setIsModalOpen={setIsInterviewedModalOpen}
                 limit={5}
                 interviewtype="Technical"
               />
@@ -154,12 +163,8 @@ const TeacherDashboard = () => {
               style={{ marginTop: "35px", width: "100%" }}
             >
               <TeachersTable
-                students={students}
-                onUpdateStudent={handleUpdateStudent}
+                students={generalStudents}
                 handleViewClick={handleInterviewedViewClick}
-                closeModal={closeInterviewedModal}
-                isModalOpen={isInterviewedModalOpen}
-                setIsModalOpen={setIsInterviewedModalOpen}
                 limit={5}
                 interviewtype="General"
               />
@@ -170,12 +175,9 @@ const TeacherDashboard = () => {
         return (
           <section className="my-8" style={{ marginTop: "10px" }}>
             <TeachersTable
-              students={students}
-              onUpdateStudent={handleUpdateStudent}
+              students={technicalStudents}
               handleViewClick={handleInterviewedViewClick}
-              closeModal={closeInterviewedModal}
-              isModalOpen={isInterviewedModalOpen}
-              setIsModalOpen={setIsInterviewedModalOpen}
+              limit={5}
               interviewtype="Technical"
             />
           </section>
@@ -184,18 +186,13 @@ const TeacherDashboard = () => {
         return (
           <section style={{ marginTop: "10px" }}>
             <TeachersTable
-              students={students}
-              onUpdateStudent={handleUpdateStudent}
+              students={generalStudents}
               handleViewClick={handleInterviewedViewClick}
-              closeModal={closeInterviewedModal}
-              isModalOpen={isInterviewedModalOpen}
-              setIsModalOpen={setIsInterviewedModalOpen}
+              limit={5}
               interviewtype="General"
             />
           </section>
         );
-      case "Logout":
-        navigate("/");
 
       default:
         return null;
@@ -203,84 +200,85 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div
-        className="w-1/6 shadow-lg fixed h-full"
-        style={{
-          backgroundColor: "#ffffff",
-          borderRight: "1px solid #e5e7eb",
-        }}
-      >
-        <div className="p-6" style={{ height: "60%" }}>
-          <h2
-            className="text-2xl font-bold mb-8 my-16"
-            style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
-          >
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: "35px",
-                width: "90%",
-                height: "100%",
-                marginBottom: "30px",
-              }}
+    currentUser.role === "teacher" && (
+      <div className="min-h-screen flex">
+        {/* Sidebar */}
+        <div
+          className="w-1/6 shadow-lg fixed h-full"
+          style={{
+            backgroundColor: "#ffffff",
+            borderRight: "1px solid #e5e7eb",
+          }}
+        >
+          <div className="p-6" style={{ height: "60%" }}>
+            <h2
+              className="text-2xl font-bold mb-8 my-16"
+              style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
             >
-              <img src={uniLogo} width="100%" alt="University Logo" />
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: "35px",
+                  width: "90%",
+                  height: "100%",
+                  marginBottom: "30px",
+                }}
+              >
+                <img src={uniLogo} width="100%" alt="University Logo" />
+              </div>
+            </h2>
+
+            {/* Navigation Items */}
+            <div className="space-y-4">
+              <NavItem
+                icon={<Home size={19} />}
+                label="Dashboard"
+                active={activeNav === "dashboard"}
+                onClick={() => setActiveNav("dashboard")}
+              />
+              <NavItem
+                icon={<Users size={19} />}
+                label="Technical Candidates"
+                active={activeNav === "students"}
+                onClick={() => setActiveNav("students")}
+              />
+              <NavItem
+                icon={<BookOpen size={19} />}
+                label="General Candidates"
+                active={activeNav === "Teachers"}
+                onClick={() => setActiveNav("Teachers")}
+              />
+
+              <NavItem
+                icon={<LogOut size={19} />}
+                label="Logout"
+                onClick={handleLogout}
+              />
             </div>
-          </h2>
-
-          {/* Navigation Items */}
-          <div className="space-y-4">
-            <NavItem
-              icon={<Home size={19} />}
-              label="Dashboard"
-              active={activeNav === "dashboard"}
-              onClick={() => setActiveNav("dashboard")}
-            />
-            <NavItem
-              icon={<Users size={19} />}
-              label="Technical Candidates"
-              active={activeNav === "students"}
-              onClick={() => setActiveNav("students")}
-            />
-            <NavItem
-              icon={<BookOpen size={19} />}
-              label="General Candidates"
-              active={activeNav === "Teachers"}
-              onClick={() => setActiveNav("Teachers")}
-            />
-
-            <NavItem
-              icon={<LogOut size={19} />}
-              label="Logout"
-              onClick={() => setActiveNav("Logout")}
-            />
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div
-        className="w-5/6 p-8 ml-[16.666667%]"
-        style={{
-          backgroundColor: "#f9fafb",
-          padding: "20px 60px 00px 30px",
-          minHeight: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        <main>{renderContent()}</main>
+        {/* Main Content */}
+        <div
+          className="w-5/6 p-8 ml-[16.666667%]"
+          style={{
+            backgroundColor: "#f9fafb",
+            padding: "20px 60px 00px 30px",
+            minHeight: "100vh",
+            overflowY: "auto",
+          }}
+        >
+          <main>{renderContent()}</main>
+        </div>
+        <TeacherTableModal
+          isOpen={isInterviewedModalOpen}
+          onClose={closeInterviewedModal}
+          selectedStudent={selectedStudent}
+          onUpdateStudent={fetchStudents}
+          currentUser={currentUser}
+        />
       </div>
-      <TeacherTableModal
-        isOpen={isInterviewedModalOpen}
-        onClose={closeInterviewedModal}
-        selectedStudent={selectedStudent}
-        onUpdateStudent={handleUpdateStudent}
-        selectedStudentUpdateFormat={selectedStudentUpdateFormat}
-        handleAccept={handleAccept}
-      />
-    </div>
+    )
   );
 };
 

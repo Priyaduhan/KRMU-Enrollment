@@ -1,16 +1,6 @@
-import React, { useState } from "react";
-import StudentDetailModal from "./StudentDetailModal";
+import React from "react";
 
-const TeachersTable = ({
-  students,
-  onUpdateStudent,
-  handleViewClick,
-  closeModal,
-  isModalOpen,
-  limit,
-  setIsModalOpen,
-  interviewtype,
-}) => {
+const TeachersTable = ({ students, handleViewClick, limit, interviewtype }) => {
   const truncateString = (str, maxLength) => {
     if (!str) return "";
     return str.length > maxLength ? `${str.substring(0, maxLength)}...` : str;
@@ -61,7 +51,7 @@ const TeachersTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {students.length === 0 ? (
+            {students?.length === 0 ? (
               <tr style={{}}>
                 <td
                   colSpan="6"
@@ -75,31 +65,32 @@ const TeachersTable = ({
               </tr>
             ) : (
               students
-                .slice(Math.max(students.length - limit, 0))
+                ?.slice(Math.max(students.length - limit, 0))
                 .map((student) => (
                   <tr
                     key={student.id}
                     className="hover:bg-gray-50 transition-colors duration-200"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {student.id}
+                      {student.studentId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(student.name, 17)}
+                      {truncateString(
+                        `${student.firstName} ${student.lastName} `,
+                        17
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(student.course, 25)}
+                      {truncateString(student.courseName, 25)}
                     </td>
                     <td
                       className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
                         color:
-                          student.technicalStatus !== "Pending"
-                            ? "#16a34a"
-                            : "#dc2626",
+                          student.status !== "Pending" ? "#16a34a" : "#dc2626",
                       }}
                     >
-                      {student.technicalStatus}
+                      {student.status}
                     </td>
 
                     <td

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import uniLogo from "./assets/uni-logo.png";
+import API from "./api";
 
 const TeacherSignUp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,7 +31,7 @@ const TeacherSignUp = () => {
     deleteSpeed: 40,
   });
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
       setLoginError("All fields are required.");
@@ -40,11 +41,23 @@ const TeacherSignUp = () => {
       setLoginError("Please enter a valid email ending with @krmu.edu.in");
       return;
     }
-    setIsLoggedIn(true);
-    navigate("/teacher/dashboard");
+
+    try {
+      const { data } = await API.post("/auth/login", {
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      localStorage.setItem("token", data.token);
+      setIsLoggedIn(true);
+      navigate("/teacher/dashboard");
+    } catch (error) {
+      console.log(error);
+      setLoginError(error || "Credentials are not right");
+    }
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     let error = "";
 
@@ -75,10 +88,21 @@ const TeacherSignUp = () => {
       return;
     }
 
-    // If no errors, proceed with signup logic
-    console.log("Signup successful!");
-    setSignupError("");
-    navigate("/teacher/dashboard");
+    try {
+      const { data } = await API.post("/auth/register", {
+        username,
+        phoneNumber,
+        email,
+        password,
+        confirmPassword,
+        role: "teacher",
+      });
+
+      localStorage.setItem("token", data.token);
+      navigate("/teacher/dashboard");
+    } catch (error) {
+      setSignupError(error || "Signup failed");
+    }
   };
 
   const toggleForm = () => {

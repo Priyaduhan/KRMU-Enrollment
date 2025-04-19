@@ -1,12 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { teacherData } from "./constants/constantData";
 
 const InterviewedStudentsModal = ({
   isOpen,
   onClose,
   selectedStudent,
-  onUpdateStudent,
-  selectedStudentUpdateFormat,
   handleAccept,
   handleReject,
 }) => {
@@ -143,7 +140,7 @@ const InterviewedStudentsModal = ({
                   minHeight: "36px",
                 }}
               >
-                {selectedStudentUpdateFormat.name.split(" ")[0] || "N/A"}
+                {selectedStudent.firstName || "N/A"}
               </div>
             </div>
             <div>
@@ -167,10 +164,7 @@ const InterviewedStudentsModal = ({
                   minHeight: "36px",
                 }}
               >
-                {selectedStudentUpdateFormat.name
-                  .split(" ")
-                  .slice(1)
-                  .join(" ") || "N/A"}
+                {selectedStudent.lastName || "N/A"}
               </div>
             </div>
           </div>
@@ -262,7 +256,7 @@ const InterviewedStudentsModal = ({
                   minHeight: "36px",
                 }}
               >
-                {formatDate(selectedStudent.selectDate) || "Not set"}
+                {formatDate(selectedStudent.interviewDate) || "Not set"}
               </div>
             </div>
             <div>
@@ -286,7 +280,7 @@ const InterviewedStudentsModal = ({
                   minHeight: "36px",
                 }}
               >
-                {formatTime(selectedStudent.selectTime) || "Not set"}
+                {formatTime(selectedStudent.interviewTime) || "Not set"}
               </div>
             </div>
           </div>
@@ -353,13 +347,16 @@ const InterviewedStudentsModal = ({
           {[
             {
               label: "Course",
-              value: selectedStudentUpdateFormat.course || "N/A",
+              value: selectedStudent.courseName || "N/A",
             },
-            { label: "School Name", value: selectedStudent.school || "N/A" },
+            {
+              label: "School Name",
+              value: selectedStudent.schoolName || "N/A",
+            },
             {
               label: "MCQ Test Marks",
-              value: selectedStudentUpdateFormat.mcq || "Pending",
-              highlight: selectedStudentUpdateFormat.mcq,
+              value: selectedStudent.mcqScore || "Pending",
+              highlight: selectedStudent.mcqScore,
             },
           ].map((field, index) => (
             <div key={index}>
@@ -394,9 +391,9 @@ const InterviewedStudentsModal = ({
           {[
             {
               label: "Technical Round",
-              value: selectedStudent.teachnicalTeacher || "Pending",
-              status: selectedStudent.teachnicalStatus,
-              highlight: selectedStudent.teachnicalTeacher,
+              value: selectedStudent.technicalTeacher || "Pending",
+              status: selectedStudent.technicalStatus,
+              highlight: selectedStudent.technicalTeacher,
             },
             {
               label: "General Round",
@@ -479,7 +476,7 @@ const InterviewedStudentsModal = ({
             }}
           >
             <button
-              onClick={handleReject}
+              //   onClick={handleReject}
               style={{
                 padding: "0.4rem 1.25rem",
                 backgroundColor: "#dc2626",
@@ -499,7 +496,7 @@ const InterviewedStudentsModal = ({
               Reject
             </button>
             <button
-              onClick={handleAccept}
+              //   onClick={handleAccept}
               style={{
                 padding: "0.4rem 1.25rem",
                 backgroundColor: "#16a34a",

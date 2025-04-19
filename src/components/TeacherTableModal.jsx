@@ -1,27 +1,70 @@
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import API from "./../api";
 
 const TeacherTableModal = ({
   isOpen,
   onClose,
   selectedStudent,
   onUpdateStudent,
-  selectedStudentUpdateFormat,
-  handleAccept,
-  handleReject,
+  currentUser,
 }) => {
   const modalRef = useRef(null);
+  const [loading, setLoading] = useState(false);
   const [editStatus, setEditStatus] = useState({
-    technicalStatus: selectedStudent?.teachnicalStatus || "",
-    generalStatus: selectedStudent?.generalStatus || "",
+    technicalStatus: selectedStudent?.technicalStatus || "Pending",
+    generalStatus: selectedStudent?.generalStatus || "Pending",
   });
 
-  // Update local state when selectedStudent changes
   useEffect(() => {
-    setEditStatus({
-      technicalStatus: selectedStudent?.teachnicalStatus || "",
-      generalStatus: selectedStudent?.generalStatus || "",
-    });
+    if (selectedStudent) {
+      setEditStatus({
+        technicalStatus: selectedStudent.technicalStatus || "Pending",
+        generalStatus: selectedStudent.generalStatus || "Pending",
+      });
+    }
   }, [selectedStudent]);
+
+  // Check if current user is the technical teacher for this student
+  const isTechnicalTeacher =
+    currentUser?.username === selectedStudent?.technicalTeacher;
+
+  // Check if current user is the general teacher for this student
+  const isGeneralTeacher =
+    currentUser?.username === selectedStudent?.generalTeacher;
+
+  const handleStatusUpdate = async () => {
+    setLoading(true);
+    try {
+      // Prepare update data based on user role
+      const updateData = {};
+
+      if (isTechnicalTeacher) {
+        updateData.technicalStatus = editStatus.technicalStatus;
+      }
+
+      if (isGeneralTeacher) {
+        updateData.generalStatus = editStatus.generalStatus;
+      }
+
+      // Only make API call if there's something to update
+      if (Object.keys(updateData).length > 0) {
+        await API.patch(`/students/${selectedStudent._id}`, updateData);
+
+        toast.success("Status updated successfully!");
+        onUpdateStudent(); // Refresh student data
+        onClose(); // Close modal
+      } else {
+        toast.warning("No changes to update");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update status");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Format ISO date to DD-MM-YYYY
   const formatDate = (isoDate) => {
@@ -91,7 +134,6 @@ const TeacherTableModal = ({
           borderRadius: "0.5rem",
           padding: "1.25rem",
           width: "95%",
-          height: "98%",
           maxWidth: "42rem",
           position: "relative",
           overflowY: "auto",
@@ -162,7 +204,7 @@ const TeacherTableModal = ({
                   minHeight: "36px",
                 }}
               >
-                {selectedStudentUpdateFormat.name.split(" ")[0] || "N/A"}
+                {selectedStudent.firstName || "N/A"}
               </div>
             </div>
             <div>
@@ -186,10 +228,7 @@ const TeacherTableModal = ({
                   minHeight: "36px",
                 }}
               >
-                {selectedStudentUpdateFormat.name
-                  .split(" ")
-                  .slice(1)
-                  .join(" ") || "N/A"}
+                {selectedStudent.lastName || "N/A"}
               </div>
             </div>
           </div>
@@ -281,7 +320,7 @@ const TeacherTableModal = ({
                   minHeight: "36px",
                 }}
               >
-                {formatDate(selectedStudent.selectDate) || "Not set"}
+                {formatDate(selectedStudent.interviewDate) || "Not set"}
               </div>
             </div>
             <div>
@@ -305,7 +344,7 @@ const TeacherTableModal = ({
                   minHeight: "36px",
                 }}
               >
-                {formatTime(selectedStudent.selectTime) || "Not set"}
+                {formatTime(selectedStudent.interviewTime) || "Not set"}
               </div>
             </div>
           </div>
@@ -372,14 +411,17 @@ const TeacherTableModal = ({
           {[
             {
               label: "Course",
-              value: selectedStudentUpdateFormat.course || "N/A",
+              value: selectedStudent.courseName || "N/A",
             },
-            { label: "School Name", value: selectedStudent.school || "N/A" },
             {
-              label: "MCQ Test Marks",
-              value: selectedStudentUpdateFormat.mcq || "Pending",
-              highlight: selectedStudentUpdateFormat.mcq,
+              label: "School Name",
+              value: selectedStudent.schoolName || "N/A",
             },
+            // {
+            //   label: "MCQ Test Marks",
+            //   value: selectedStudent.mcqScore || "Pending",
+            //   highlight: selectedStudent.mcqScore,
+            // },
           ].map((field, index) => (
             <div key={index}>
               <label
@@ -414,9 +456,9 @@ const TeacherTableModal = ({
             {
               type: "technical",
               label: "Technical Round",
-              value: selectedStudent.teachnicalTeacher || "Pending",
+              value: selectedStudent.technicalTeacher || "Pending",
               status: editStatus.technicalStatus,
-              highlight: selectedStudent.teachnicalTeacher,
+              highlight: selectedStudent.technicalTeacher,
             },
             {
               type: "general",
@@ -460,6 +502,7 @@ const TeacherTableModal = ({
                   {teacher.value}
                 </div>
               </div>
+
               <div>
                 <label
                   style={{
@@ -472,6 +515,7 @@ const TeacherTableModal = ({
                 >
                   {teacher.label} Status
                 </label>
+
                 <select
                   value={teacher.status}
                   onChange={(e) =>
@@ -481,6 +525,11 @@ const TeacherTableModal = ({
                         : "generalStatus",
                       e.target.value
                     )
+                  }
+                  disabled={
+                    teacher.type === "technical"
+                      ? !isTechnicalTeacher
+                      : !isGeneralTeacher
                   }
                   style={{
                     width: "100%",
@@ -513,15 +562,17 @@ const TeacherTableModal = ({
             }}
           >
             <button
-              onClick={() => {
-                const updatedStudent = {
-                  ...selectedStudent,
-                  teachnicalStatus: editStatus.technicalStatus,
-                  generalStatus: editStatus.generalStatus,
-                };
-                onUpdateStudent(updatedStudent);
-                handleAccept();
-              }}
+              onClick={handleStatusUpdate}
+              //   onClick={() => {
+              //     const updatedStudent = {
+              //       ...selectedStudent,
+              //       teachnicalStatus: editStatus.technicalStatus,
+              //       generalStatus: editStatus.generalStatus,
+              //     };
+              //     onUpdateStudent(updatedStudent);
+              //     handleAccept();
+              //   }}
+              disabled={loading}
               style={{
                 padding: "0.6rem 1.25rem",
                 backgroundColor: "#16a34a",
@@ -538,7 +589,7 @@ const TeacherTableModal = ({
                 (e.currentTarget.style.backgroundColor = "#16a34a")
               }
             >
-              Update Status
+              {loading ? "Updating..." : "Update Status"}
             </button>
           </div>
         </div>

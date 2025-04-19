@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import DatePicker from "react-datepicker";
@@ -15,18 +15,11 @@ import {
   InputLabel,
   Grid,
 } from "@mui/material";
+import API from "./api";
+import { useNavigate } from "react-router-dom";
 
 const StudentForm = () => {
-  const generateStudentId = () => {
-    const existingStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const lastStudent = existingStudents[existingStudents.length - 1];
-    const lastIdNumber = lastStudent
-      ? parseInt(lastStudent.id.replace("KRMU", ""))
-      : 0;
-    const nextIdNumber = lastIdNumber + 1;
-    const paddedNumber = String(nextIdNumber).padStart(7, "0");
-    return `KRMU${paddedNumber}`;
-  };
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -66,25 +59,22 @@ const StudentForm = () => {
       selectDate: Yup.date().required("Date is required"),
       selectTime: Yup.date().required("Time is required"),
     }),
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       try {
-        const studentId = generateStudentId();
-        const studentDetails = {
-          id: studentId,
-          url: "",
-          mcq: 0,
-          generalTeacher: "",
-          teachnicalTeacher: "",
-          school: values.schoolName,
-          generalStatus: "Pending",
-          technicalStatus: "Pending",
-          ...values,
-        };
-
-        const existingStudents =
-          JSON.parse(localStorage.getItem("students")) || [];
-        const updatedStudents = [...existingStudents, studentDetails];
-        localStorage.setItem("students", JSON.stringify(updatedStudents));
+        const response = await API.post("/students", {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          contactNumber: values.contactNumber,
+          fathersName: values.fathersName,
+          gender: values.gender,
+          courseName: values.courseName,
+          schoolName: values.schoolName,
+          state: values.state,
+          city: values.city,
+          selectDate: values.selectDate.toISOString(),
+          selectTime: values.selectTime.toISOString(),
+        });
 
         toast.success("Student added successfully!", {
           position: "top-right",
@@ -98,7 +88,8 @@ const StudentForm = () => {
 
         formik.resetForm();
       } catch (error) {
-        toast.error("Failed to add student. Please try again.", {
+        console.log(error);
+        toast.error(error || "Failed to add student", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -108,9 +99,19 @@ const StudentForm = () => {
           progress: undefined,
         });
         console.error("Error submitting form:", error);
+      } finally {
+        setSubmitting(false);
       }
     },
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
+      navigate("/counsellor/login");
+    }
+  }, []);
 
   return (
     <div

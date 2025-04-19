@@ -1,94 +1,142 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useNavigate } from "react-router-dom";
+import API from "./api"; // Import your Axios instance
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+// Components
 import StudentTable from "./components/StudentTable";
-import TeachersTable from "./components/TeachersTable";
 import NavItem from "./components/ui/NavItem";
 import StatusCard from "./components/ui/StatusCard";
 import uniLogo from "./assets/uni-logo.png";
 import StudentDetailModal from "./components/StudentDetailModal";
-
-import { teacherData, stats } from "./components/constants/constantData";
-
-import {
-  Users,
-  UserCheck,
-  Clock,
-  Home,
-  BookOpen,
-  Calendar,
-  Settings,
-  LogOut,
-} from "lucide-react";
 import InterviewedCandidates from "./components/InterviewedCandidates";
 import InterviewedStudentsModal from "./components/InterviewedStudentsModal";
 
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// Icons
+import { Users, UserCheck, Clock, Home, LogOut } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  // State to store student data
-  const [students, setStudents] = useState([]);
-  const [teachers] = useState(teacherData);
+  const [loading, setLoading] = useState(true);
+  const [candidatesWaitingList, setCandidatesWaitingList] = useState([]);
+  const [interviewedCandidates, setInterviewedCandidates] = useState([]);
+  const [stats, setStats] = useState({
+    enrolled: 0,
+    waitingForInterview: 0,
+    total: 0,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewedModalOpen, setIsInterviewedModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedStudentUpdateFormat, setSelectedStudentUpdateFormat] =
-    useState(null);
-
   const [activeNav, setActiveNav] = useState("dashboard");
+  const [currentUser, setCurrentUser] = useState({});
+  const [teacherData, setTeacherData] = useState([]);
+
+  // Fetch students and stats from backend
+  const fetchStudents = async () => {
+    try {
+      const { data } = await API.get("/students");
+
+      // Extract the data from response
+      const waitingForInterview = data?.data?.waitingForInterview || [];
+      const interviewedCandidates = data?.data?.interviewedCandidates || [];
+
+      // Update the student lists
+      setCandidatesWaitingList(waitingForInterview);
+      setInterviewedCandidates(interviewedCandidates);
+
+      // Calculate statistics
+      const passedCandidates = data?.data?.interviewedCandidates.filter(
+        (student) => student.status === "Pass"
+      ).length;
+
+      // Update stats state
+      setStats({
+        enrolled: passedCandidates,
+        waitingForInterview: waitingForInterview.length,
+        total: waitingForInterview.length + interviewedCandidates.length,
+      });
+    } catch (error) {
+      toast.error("Failed to fetch students");
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const { data } = await API.get("/auth/me");
+      if (data.data.user.role === "teacher") {
+        navigate("/counsellor/login");
+      }
+      setCurrentUser(data.data.user);
+    } catch (error) {
+      toast.error("Failed to fetch user details");
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const { data } = await API.get("/auth/teachers");
+      console.log(data.data.teachers);
+      setTeacherData(data.data.teachers);
+    } catch (error) {
+      console.error("Failed to fetch teachers:", error);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await fetchCurrentUser();
+        await fetchStudents();
+        await fetchTeachers();
+      } catch (error) {
+        toast.error("Error loading data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
+      navigate("/counsellor/login");
+    } else {
+      loadData();
+    }
+  }, []);
 
   const handleViewClick = (student) => {
-    // Find the selected student from the students array
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const currentStudent = storedStudents.find((s) => s.id === student.id);
-    setSelectedStudent(currentStudent);
-    setSelectedStudentUpdateFormat(student);
+    setSelectedStudent(student);
     setIsModalOpen(true);
   };
 
   const handleInterviewedViewClick = (student) => {
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const currentStudent = storedStudents.find((s) => s.id === student.id);
-    setSelectedStudent(currentStudent);
-    setSelectedStudentUpdateFormat(student);
+    setSelectedStudent(student);
     setIsInterviewedModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedStudent(null);
+    fetchStudents(); // Refresh data after modal closes
   };
 
   const closeInterviewedModal = () => {
     setIsInterviewedModalOpen(false);
     setSelectedStudent(null);
+    fetchStudents(); // Refresh data after modal closes
   };
 
-  // Fetch student data from localStorage on component mount
-  useEffect(() => {
-    console.log("ruuuning");
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const formattedStudents = storedStudents.map((student) => ({
-      id: student.id,
-      name: `${student.firstName} ${student.lastName}`,
-      course: student.courseName,
-      zoomStatus: student.url ? "Added" : "Pending", // Check if URL exists
-      teacherAssigned: "Assigned", // Default to "Pending" (you can update this logic as needed)
-      mcq: student.mcq || 0, // Use the MCQ value from localStorage
-    }));
-    setStudents(formattedStudents);
-  }, [isModalOpen, isInterviewedModalOpen]);
-
-  // Function to update student data
-  const handleUpdateStudent = (updatedStudent) => {
-    const updatedStudents = students.map((student) =>
-      student.id === updatedStudent.id ? updatedStudent : student
-    );
-    setStudents(updatedStudents);
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
+      localStorage.removeItem("token");
+      navigate("/counsellor/login");
+    } catch (error) {
+      toast.error("Logout failed. Please try again.");
+    }
   };
 
   const handleAccept = () => {
@@ -147,8 +195,8 @@ const Dashboard = () => {
               >
                 <StatusCard
                   icon={<Users className="text-blue-600" size={20} />}
-                  title="Total Candidates Enrolled"
-                  value={stats.enrolled}
+                  title="Total Candidates"
+                  value={stats.total}
                   bgColor="bg-blue-50"
                   textColor="text-blue-600"
                 />
@@ -161,8 +209,8 @@ const Dashboard = () => {
                 />
                 <StatusCard
                   icon={<UserCheck className="text-green-600" size={20} />}
-                  title="Currently in Interview"
-                  value={stats.inInterview}
+                  title="Total Enrolled Candidates"
+                  value={stats.enrolled}
                   bgColor="bg-green-50"
                   textColor="text-green-600"
                 />
@@ -174,12 +222,8 @@ const Dashboard = () => {
               style={{ marginTop: "35px", width: "100%" }}
             >
               <StudentTable
-                students={students}
-                onUpdateStudent={handleUpdateStudent}
+                students={candidatesWaitingList}
                 handleViewClick={handleViewClick}
-                closeModal={closeModal}
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen}
                 limit={5}
               />
             </section>
@@ -189,31 +233,20 @@ const Dashboard = () => {
               style={{ marginTop: "35px", width: "100%" }}
             >
               <InterviewedCandidates
-                students={students}
-                onUpdateStudent={handleUpdateStudent}
+                students={interviewedCandidates}
                 handleViewClick={handleInterviewedViewClick}
-                closeModal={closeInterviewedModal}
-                isModalOpen={isInterviewedModalOpen}
-                setIsModalOpen={setIsInterviewedModalOpen}
                 limit={5}
               />
             </section>
-
-            {/* <section style={{ marginTop: "35px" }}>
-              <TeachersTable teachers={teachers} />
-            </section> */}
           </>
         );
       case "students":
         return (
           <section className="my-8" style={{ marginTop: "10px" }}>
             <StudentTable
-              students={students}
-              onUpdateStudent={handleUpdateStudent}
+              students={candidatesWaitingList}
               handleViewClick={handleViewClick}
-              closeModal={closeModal}
-              isModalOpen={isModalOpen}
-              setIsModalOpen={setIsModalOpen}
+              limit={5}
             />
           </section>
         );
@@ -221,110 +254,105 @@ const Dashboard = () => {
         return (
           <section style={{ marginTop: "10px" }}>
             <InterviewedCandidates
-              students={students}
-              onUpdateStudent={handleUpdateStudent}
+              students={interviewedCandidates}
               handleViewClick={handleInterviewedViewClick}
-              closeModal={closeInterviewedModal}
-              isModalOpen={isInterviewedModalOpen}
-              setIsModalOpen={setIsInterviewedModalOpen}
+              limit={5}
             />
           </section>
         );
-      case "Logout":
-        navigate("/");
-
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div
-        className="w-1/6 shadow-lg fixed h-full"
-        style={{
-          backgroundColor: "#ffffff",
-          borderRight: "1px solid #e5e7eb",
-        }}
-      >
-        <div className="p-6" style={{ height: "60%" }}>
-          <h2
-            className="text-2xl font-bold mb-8 my-16"
-            style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
-          >
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: "35px",
-                width: "90%",
-                height: "100%",
-                marginBottom: "30px",
-              }}
+    currentUser.role === "counsellor" && (
+      <div className="min-h-screen flex">
+        {/* Sidebar */}
+        <div
+          className="w-1/6 shadow-lg fixed h-full"
+          style={{
+            backgroundColor: "#ffffff",
+            borderRight: "1px solid #e5e7eb",
+          }}
+        >
+          <div className="p-6" style={{ height: "60%" }}>
+            <h2
+              className="text-2xl font-bold mb-8 my-16"
+              style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
             >
-              <img src={uniLogo} width="100%" alt="University Logo" />
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: "35px",
+                  width: "90%",
+                  height: "100%",
+                  marginBottom: "30px",
+                }}
+              >
+                <img src={uniLogo} width="100%" alt="University Logo" />
+              </div>
+            </h2>
+
+            {/* Navigation Items */}
+            <div className="space-y-4">
+              <NavItem
+                icon={<Home size={19} />}
+                label="Dashboard"
+                active={activeNav === "dashboard"}
+                onClick={() => setActiveNav("dashboard")}
+              />
+              <NavItem
+                icon={<Users size={19} />}
+                label="Candidates"
+                active={activeNav === "students"}
+                onClick={() => setActiveNav("students")}
+              />
+              <NavItem
+                icon={<UserCheck size={19} />}
+                label="Interviewed"
+                active={activeNav === "Teachers"}
+                onClick={() => setActiveNav("Teachers")}
+              />
+
+              <NavItem
+                icon={<LogOut size={19} />}
+                label="Logout"
+                onClick={handleLogout}
+              />
             </div>
-          </h2>
-
-          {/* Navigation Items */}
-          <div className="space-y-4">
-            <NavItem
-              icon={<Home size={19} />}
-              label="Dashboard"
-              active={activeNav === "dashboard"}
-              onClick={() => setActiveNav("dashboard")}
-            />
-            <NavItem
-              icon={<Users size={19} />}
-              label="Candidates"
-              active={activeNav === "students"}
-              onClick={() => setActiveNav("students")}
-            />
-            <NavItem
-              icon={<UserCheck size={19} />}
-              label="Interviewed"
-              active={activeNav === "Teachers"}
-              onClick={() => setActiveNav("Teachers")}
-            />
-
-            <NavItem
-              icon={<LogOut size={19} />}
-              label="Logout"
-              onClick={() => setActiveNav("Logout")}
-            />
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div
-        className="w-5/6 p-8 ml-[16.666667%]"
-        style={{
-          backgroundColor: "#f9fafb",
-          padding: "20px 60px 00px 30px",
-          minHeight: "100vh",
-          overflowY: "auto",
-        }}
-      >
-        <main>{renderContent()}</main>
+        {/* Main Content */}
+        <div
+          className="w-5/6 p-8 ml-[16.666667%]"
+          style={{
+            backgroundColor: "#f9fafb",
+            padding: "20px 60px 00px 30px",
+            minHeight: "100vh",
+            overflowY: "auto",
+          }}
+        >
+          <main>{renderContent()}</main>
+        </div>
+        <StudentDetailModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          student={selectedStudent}
+          onUpdate={fetchStudents}
+          teachersList={teacherData}
+        />
+
+        <InterviewedStudentsModal
+          isOpen={isInterviewedModalOpen}
+          onClose={closeInterviewedModal}
+          selectedStudent={selectedStudent}
+          handleReject={handleReject}
+          handleAccept={handleAccept}
+        />
       </div>
-      <StudentDetailModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        selectedStudent={selectedStudent}
-        onUpdateStudent={handleUpdateStudent}
-        selectedStudentUpdateFormat={selectedStudentUpdateFormat}
-      />
-      <InterviewedStudentsModal
-        isOpen={isInterviewedModalOpen}
-        onClose={closeInterviewedModal}
-        selectedStudent={selectedStudent}
-        onUpdateStudent={handleUpdateStudent}
-        selectedStudentUpdateFormat={selectedStudentUpdateFormat}
-        handleReject={handleReject}
-        handleAccept={handleAccept}
-      />
-    </div>
+    )
   );
 };
 

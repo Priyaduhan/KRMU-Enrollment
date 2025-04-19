@@ -1,15 +1,7 @@
 import React, { useState } from "react";
 import StudentDetailModal from "./StudentDetailModal";
 
-const StudentTable = ({
-  students,
-  onUpdateStudent,
-  handleViewClick,
-  closeModal,
-  isModalOpen,
-  setIsModalOpen,
-  limit,
-}) => {
+const StudentTable = ({ students, handleViewClick, limit }) => {
   const truncateString = (str, maxLength) => {
     if (!str) return "";
     return str.length > maxLength ? `${str.substring(0, maxLength)}...` : str;
@@ -63,7 +55,7 @@ const StudentTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {students.length === 0 ? (
+            {students?.length === 0 ? (
               <tr style={{}}>
                 <td
                   colSpan="6"
@@ -77,37 +69,39 @@ const StudentTable = ({
               </tr>
             ) : (
               students
-                .slice(Math.max(students.length - limit, 0))
+                ?.slice(Math.max(students.length - limit, 0))
                 .map((student) => (
                   <tr
                     key={student.id}
                     className="hover:bg-gray-50 transition-colors duration-200"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {student.id}
+                      {student.studentId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(student.name, 17)}
+                      {truncateString(
+                        `${student.firstName} ${student.lastName} `,
+                        17
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(student.course, 25)}
+                      {truncateString(student.courseName, 25)}
                     </td>
                     <td
                       className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
-                        color: student.mcq != 0 ? "#16a34a" : "#dc2626",
+                        color: student.mcqScore != 0 ? "#16a34a" : "#dc2626",
                       }}
                     >
-                      {student.mcq == 0 ? "Pending" : student.mcq}
+                      {student.mcqScore == 0 ? "Pending" : student.mcqScore}
                     </td>
                     <td
                       className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
-                        color:
-                          student.zoomStatus == "Added" ? "#16a34a" : "#dc2626",
+                        color: student.zoomLink !== "" ? "#16a34a" : "#dc2626",
                       }}
                     >
-                      {student.zoomStatus}
+                      {student.zoomLink ? "Added" : "Pending"}
                     </td>
                     <td
                       style={{
