@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import uniLogo from "./assets/uni-logo.png";
 import API from "./api";
+import krm from "./assets/krm.png";
+import krm2 from "./assets/krm-new.png";
 
 const SignUp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -122,19 +124,32 @@ const SignUp = () => {
   };
 
   return (
-    <div className="Main-login">
-      <div className="content">
+    <div
+      className="Main-login"
+      style={{
+        width: "100vw",
+        height: "100vh",
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url(${krm2})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        position: "relative",
+      }}
+    >
+      <div className="content" style={{ color: "rgba(248, 248, 255, 0.76)" }}>
         <h2>
           <p>
             Welcome to <span>K.R Mangalam University</span>
           </p>
         </h2>
-        <p>
+        <p style={{ fontSize: "17px", marginTop: "4px" }}>
           Your Final destination for <span>{typeEffect}</span>
         </p>
       </div>
-
-      <div className={`login-container ${isLogin ? "" : "flipped"}`}>
+      <div
+        className={`login-container ${isLogin ? "" : "flipped"}`}
+        style={{ color: "rgba(248, 248, 255, 0.76)" }}
+      >
         <div
           className={`login-logo ${isLogin ? "" : "flipped"}`}
           style={{
