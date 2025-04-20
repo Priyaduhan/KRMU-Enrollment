@@ -8,9 +8,9 @@ const InterviewedCandidates = ({ students, handleViewClick, limit }) => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case "selected":
+      case "pass":
         return { bg: "#dcfce7", text: "#166534" }; // Green
-      case "rejected":
+      case "fail":
         return { bg: "#fee2e2", text: "#991b1b" }; // Red
       case "pending":
         return { bg: "#fef3c7", text: "#92400e" }; // Amber

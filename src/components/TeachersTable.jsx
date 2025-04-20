@@ -8,9 +8,9 @@ const TeachersTable = ({ students, handleViewClick, limit, interviewtype }) => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case "completed":
+      case "pass":
         return { bg: "#dcfce7", text: "#166534" }; // Green
-      case "rejected":
+      case "fail":
         return { bg: "#fee2e2", text: "#991b1b" }; // Red
       case "pending":
         return { bg: "#fef3c7", text: "#92400e" }; // Amber
@@ -149,7 +149,11 @@ const TeachersTable = ({ students, handleViewClick, limit, interviewtype }) => {
               students
                 ?.slice(Math.max(students.length - limit, 0))
                 .map((student) => {
-                  const statusColors = getStatusColor(student.status);
+                  const statusInterview =
+                    interviewtype === "Technical"
+                      ? student.technicalStatus
+                      : student.generalStatus;
+                  const statusColors = getStatusColor(statusInterview);
                   return (
                     <tr
                       key={student.id}
@@ -209,7 +213,7 @@ const TeachersTable = ({ students, handleViewClick, limit, interviewtype }) => {
                             fontSize: "13px",
                           }}
                         >
-                          {student.status || "Pending"}
+                          {statusInterview}
                         </span>
                       </td>
                       <td

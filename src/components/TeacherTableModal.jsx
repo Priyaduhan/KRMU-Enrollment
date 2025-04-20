@@ -417,11 +417,11 @@ const TeacherTableModal = ({
               label: "School Name",
               value: selectedStudent.schoolName || "N/A",
             },
-            // {
-            //   label: "MCQ Test Marks",
-            //   value: selectedStudent.mcqScore || "Pending",
-            //   highlight: selectedStudent.mcqScore,
-            // },
+            {
+              label: "Microsoft Teams Link",
+              value: selectedStudent.zoomLink || "Pending",
+              highlight: selectedStudent.zoomLink,
+            },
           ].map((field, index) => (
             <div key={index}>
               <label
