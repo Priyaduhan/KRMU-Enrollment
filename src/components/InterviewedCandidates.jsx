@@ -5,141 +5,271 @@ const InterviewedCandidates = ({ students, handleViewClick, limit }) => {
     if (!str) return "";
     return str.length > maxLength ? `${str.substring(0, maxLength)}...` : str;
   };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "selected":
+        return { bg: "#dcfce7", text: "#166534" }; // Green
+      case "rejected":
+        return { bg: "#fee2e2", text: "#991b1b" }; // Red
+      case "pending":
+        return { bg: "#fef3c7", text: "#92400e" }; // Amber
+      default:
+        return { bg: "#e5e7eb", text: "#4b5563" }; // Gray
+    }
+  };
+
   return (
-    <>
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+    <div style={{ marginTop: "32px" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "600",
+          color: "#111827",
+          marginBottom: "24px",
+          textAlign: "center",
+          letterSpacing: "-0.25px",
+        }}
+      >
         Interviewed Candidates
       </h3>
+
       <div
-        className="bg-white rounded-lg shadow-lg overflow-hidden"
-        style={{ marginTop: "25px" }}
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+          overflow: "hidden",
+        }}
       >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                backgroundColor: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+              }}
+            >
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "15%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "15%",
+                }}
               >
                 ID
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "17%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "17%",
+                }}
               >
                 Name
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "22%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "22%",
+                }}
               >
                 Course
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "20%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "20%",
+                }}
               >
                 Interview Status
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "16%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "16%",
+                }}
               >
                 Email Status
               </th>
               <th
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "20%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "right",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "20%",
+                }}
               ></th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody>
             {students?.length === 0 ? (
-              <tr style={{}}>
+              <tr>
                 <td
                   colSpan="6"
-                  className="text-center py-4"
-                  style={{ paddingTop: "70px", paddingBottom: "50px" }}
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 24px",
+                    color: "#6b7280",
+                    fontSize: "16px",
+                  }}
                 >
-                  <strong style={{ fontSize: "20px" }}>
-                    No student enrolled yet
-                  </strong>
+                  No candidates interviewed yet
                 </td>
               </tr>
             ) : (
               students
                 ?.slice(Math.max(students.length - limit, 0))
-                .map((student) => (
-                  <tr
-                    key={student.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {student.studentId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(
-                        `${student.firstName} ${student.lastName} `,
-                        17
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {truncateString(student.courseName, 25)}
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
+                .map((student) => {
+                  const statusColors = getStatusColor(student.status);
+                  return (
+                    <tr
+                      key={student.id}
                       style={{
-                        color:
-                          student.status !== "Pending" ? "#16a34a" : "#dc2626",
+                        borderBottom: "1px solid #e5e7eb",
+                        transition: "background-color 0.2s ease",
+                        ":hover": {
+                          backgroundColor: "#f9fafb",
+                        },
                       }}
                     >
-                      {student.status}
-                    </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
-                      style={{
-                        color:
-                          student.zoomStatus == "Added" ? "#16a34a" : "#dc2626",
-                      }}
-                    >
-                      {/* {student.zoomStatus} */}
-                      Sent
-                    </td>
-                    <td
-                      style={{
-                        padding: "16px 0px",
-                        whiteSpace: "nowrap",
-                        fontSize: "14px",
-                        color: "#4b5563",
-                        textAlign: "right",
-                      }}
-                    >
-                      <button
+                      <td
                         style={{
-                          color: "#2563eb",
-                          marginRight: "12px",
-                          transition: "color 0.2s",
-                          background: "",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "10px 20px",
+                          padding: "16px 24px",
+                          fontSize: "14px",
+                          color: "#111827",
+                          fontWeight: "500",
                         }}
-                        onMouseOver={(e) => (e.target.style.color = "#1e40af")}
-                        onMouseOut={(e) => (e.target.style.color = "#2563eb")}
-                        onClick={() => handleViewClick(student)}
                       >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                        {student.studentId}
+                      </td>
+                      <td
+                        style={{
+                          padding: "16px 24px",
+                          fontSize: "14px",
+                          color: "#374151",
+                        }}
+                      >
+                        {truncateString(
+                          `${student.firstName} ${student.lastName}`,
+                          17
+                        )}
+                      </td>
+                      <td
+                        style={{
+                          padding: "16px 24px",
+                          fontSize: "14px",
+                          color: "#374151",
+                        }}
+                      >
+                        {truncateString(student.courseName, 25)}
+                      </td>
+                      <td
+                        style={{
+                          padding: "16px 24px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "4px 12px",
+                            borderRadius: "20px",
+                            backgroundColor: statusColors.bg,
+                            color: statusColors.text,
+                            fontWeight: "500",
+                            fontSize: "13px",
+                          }}
+                        >
+                          {student.status || "Pending"}
+                        </span>
+                      </td>
+                      <td
+                        style={{
+                          padding: "16px 24px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          color:
+                            student.zoomStatus === "Added"
+                              ? "#16a34a"
+                              : "#dc2626",
+                        }}
+                      >
+                        {student.zoomStatus === "Added" ? "Sent" : "Pending"}
+                      </td>
+                      <td
+                        style={{
+                          padding: "16px 24px",
+                          textAlign: "right",
+                        }}
+                      >
+                        <button
+                          onClick={() => handleViewClick(student)}
+                          style={{
+                            backgroundColor: "transparent",
+                            border: "1px solid #2563eb",
+                            color: "#2563eb",
+                            borderRadius: "6px",
+                            padding: "8px 16px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            ":hover": {
+                              backgroundColor: "#2563eb",
+                              color: "#ffffff",
+                            },
+                          }}
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Modal for Student Details */}
-    </>
+    </div>
   );
 };
 

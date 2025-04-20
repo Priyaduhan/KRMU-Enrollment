@@ -110,7 +110,10 @@ const TeacherDashboard = () => {
         return (
           <>
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+              <h2
+                className="text-3xl font-bold text-gray-800 mb-4 text-center"
+                style={{ marginTop: "10px", fontSize: "28px" }}
+              >
                 Teacher Dashboard
               </h2>
               <div
@@ -119,7 +122,7 @@ const TeacherDashboard = () => {
                   display: "flex",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginTop: "25px",
+                  marginTop: "30px",
                 }}
               >
                 <StatusCard
@@ -148,7 +151,7 @@ const TeacherDashboard = () => {
 
             <section
               className="my-8"
-              style={{ marginTop: "35px", width: "100%" }}
+              style={{ marginTop: "80px", width: "100%" }}
             >
               <TeachersTable
                 students={technicalStudents}
@@ -160,7 +163,7 @@ const TeacherDashboard = () => {
 
             <section
               className="my-8"
-              style={{ marginTop: "35px", width: "100%" }}
+              style={{ marginTop: "65px", width: "100%" }}
             >
               <TeachersTable
                 students={generalStudents}
@@ -202,36 +205,57 @@ const TeacherDashboard = () => {
   return (
     currentUser.role === "teacher" && (
       <div className="min-h-screen flex">
-        {/* Sidebar */}
         <div
-          className="w-1/6 shadow-lg fixed h-full"
           style={{
+            width: "240px",
+            position: "fixed",
+            height: "100vh",
             backgroundColor: "#ffffff",
             borderRight: "1px solid #e5e7eb",
+            boxShadow: "4px 0 15px rgba(0, 0, 0, 0.02)",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 10,
           }}
         >
-          <div className="p-6" style={{ height: "60%" }}>
-            <h2
-              className="text-2xl font-bold mb-8 my-16"
-              style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
+          <div
+            style={{
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            }}
+          >
+            {/* Logo Section */}
+            <div
+              style={{
+                textAlign: "center",
+                margin: "10px 0 40px",
+                padding: "0 0px",
+              }}
             >
-              <div
+              <img
+                src={uniLogo}
                 style={{
-                  textAlign: "center",
-                  marginTop: "35px",
-                  width: "90%",
-                  height: "100%",
-                  marginBottom: "30px",
+                  width: "100%",
+                  maxWidth: "180px",
+                  height: "auto",
                 }}
-              >
-                <img src={uniLogo} width="100%" alt="University Logo" />
-              </div>
-            </h2>
+                alt="University Logo"
+              />
+            </div>
 
             {/* Navigation Items */}
-            <div className="space-y-4">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flexGrow: 1,
+              }}
+            >
               <NavItem
-                icon={<Home size={19} />}
+                icon={<Home size={20} />}
                 label="Dashboard"
                 active={activeNav === "dashboard"}
                 onClick={() => setActiveNav("dashboard")}
@@ -249,10 +273,14 @@ const TeacherDashboard = () => {
                 onClick={() => setActiveNav("Teachers")}
               />
 
+              {/* Spacer to push logout to bottom */}
+              <div style={{ flexGrow: 1 }}></div>
+
               <NavItem
-                icon={<LogOut size={19} />}
+                icon={<LogOut size={20} />}
                 label="Logout"
                 onClick={handleLogout}
+                isLogout={true}
               />
             </div>
           </div>

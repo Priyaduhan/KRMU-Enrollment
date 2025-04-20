@@ -1,70 +1,145 @@
-import React, { useState } from "react";
-import StudentDetailModal from "./StudentDetailModal";
+import React from "react";
 
 const StudentTable = ({ students, handleViewClick, limit }) => {
   const truncateString = (str, maxLength) => {
     if (!str) return "";
     return str.length > maxLength ? `${str.substring(0, maxLength)}...` : str;
   };
+
   return (
-    <>
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+    <div style={{ marginTop: "32px" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "600",
+          color: "#111827",
+          marginBottom: "37px",
+          textAlign: "center",
+          letterSpacing: "-0.25px",
+        }}
+      >
         Candidates Waiting for Interview
       </h3>
+
       <div
-        className="bg-white rounded-lg shadow-lg overflow-hidden"
-        style={{ marginTop: "25px" }}
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+          overflow: "hidden",
+        }}
       >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                backgroundColor: "#f9fafb",
+                borderBottom: "1px solid #e5e7eb",
+              }}
+            >
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "15%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "15%",
+                }}
               >
                 ID
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "17%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "17%",
+                }}
               >
                 Name
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "22%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "22%",
+                }}
               >
                 Course
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "10%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "10%",
+                }}
               >
                 MCQ
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "26%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "left",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "26%",
+                }}
               >
                 Microsoft Teams
               </th>
               <th
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                style={{ width: "20%" }}
+                style={{
+                  padding: "16px 24px",
+                  textAlign: "right",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#6b7280",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  width: "20%",
+                }}
               ></th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody>
             {students?.length === 0 ? (
-              <tr style={{}}>
+              <tr>
                 <td
                   colSpan="6"
-                  className="text-center py-4"
-                  style={{ paddingTop: "70px", paddingBottom: "50px" }}
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 24px",
+                    color: "#6b7280",
+                    fontSize: "16px",
+                  }}
                 >
-                  <strong style={{ fontSize: "20px" }}>
-                    No student enrolled yet
-                  </strong>
+                  No student enrolled yet
                 </td>
               </tr>
             ) : (
@@ -73,74 +148,91 @@ const StudentTable = ({ students, handleViewClick, limit }) => {
                 .map((student) => (
                   <tr
                     key={student.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
+                    style={{
+                      borderBottom: "1px solid #e5e7eb",
+                      transition: "background-color 0.2s ease",
+                      ":hover": {
+                        backgroundColor: "#f9fafb",
+                      },
+                    }}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td
+                      style={{
+                        padding: "16px 24px",
+                        fontSize: "14px",
+                        color: "#111827",
+                        fontWeight: "500",
+                      }}
+                    >
                       {student.studentId}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td
+                      style={{
+                        padding: "16px 24px",
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
                       {truncateString(
-                        `${student.firstName} ${student.lastName} `,
+                        `${student.firstName} ${student.lastName}`,
                         17
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td
+                      style={{
+                        padding: "16px 24px",
+                        fontSize: "14px",
+                        color: "#374151",
+                      }}
+                    >
                       {truncateString(student.courseName, 25)}
                     </td>
                     <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
+                        padding: "16px 24px",
+                        fontSize: "14px",
+                        fontWeight: "500",
                         color: student.mcqScore != 0 ? "#16a34a" : "#dc2626",
                       }}
                     >
                       {student.mcqScore == 0 ? "Pending" : student.mcqScore}
                     </td>
                     <td
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
                       style={{
-                        color: student.zoomLink !== "" ? "#16a34a" : "#dc2626",
+                        padding: "16px 24px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: student.zoomLink ? "#16a34a" : "#dc2626",
                       }}
                     >
                       {student.zoomLink ? "Added" : "Pending"}
                     </td>
                     <td
                       style={{
-                        padding: "16px 0px",
-                        whiteSpace: "nowrap",
-                        fontSize: "14px",
-                        color: "#4b5563",
+                        padding: "16px 24px",
                         textAlign: "right",
                       }}
                     >
                       <button
-                        style={{
-                          color: "#2563eb",
-                          marginRight: "12px",
-                          transition: "color 0.2s",
-                          background: "",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "10px 20px",
-                        }}
-                        onMouseOver={(e) => (e.target.style.color = "#1e40af")}
-                        onMouseOut={(e) => (e.target.style.color = "#2563eb")}
                         onClick={() => handleViewClick(student)}
+                        style={{
+                          backgroundColor: "transparent",
+                          border: "1px solid #2563eb",
+                          color: "#2563eb",
+                          borderRadius: "6px",
+                          padding: "8px 16px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          marginRight: "12px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          ":hover": {
+                            backgroundColor: "#2563eb",
+                            color: "#ffffff",
+                          },
+                        }}
                       >
                         View
-                      </button>
-                      <button
-                        style={{
-                          color: "#16a34a",
-                          transition: "color 0.2s",
-                          background: "",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "10px 20px",
-                        }}
-                        onMouseOver={(e) => (e.target.style.color = "#166534")}
-                        onMouseOut={(e) => (e.target.style.color = "#16a34a")}
-                      >
-                        Start Interview
                       </button>
                     </td>
                   </tr>
@@ -149,9 +241,7 @@ const StudentTable = ({ students, handleViewClick, limit }) => {
           </tbody>
         </table>
       </div>
-
-      {/* Modal for Student Details */}
-    </>
+    </div>
   );
 };
 

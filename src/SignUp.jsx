@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useTypewriter, Cursor } from "react-simple-typewriter";
 import uniLogo from "./assets/uni-logo.png";
 import API from "./api";
-import krm from "./assets/krm.png";
 import krm2 from "./assets/krm-new.png";
 
 const SignUp = () => {
@@ -139,7 +138,7 @@ const SignUp = () => {
       <div className="content" style={{ color: "rgba(248, 248, 255, 0.76)" }}>
         <h2>
           <p>
-            Welcome to <span>K.R Mangalam University</span>
+            Welcome to <span>K.R. Mangalam University</span>
           </p>
         </h2>
         <p style={{ fontSize: "17px", marginTop: "4px" }}>
@@ -201,7 +200,10 @@ const SignUp = () => {
                 Login
               </button>
             </form>
-            <p className="signup-text">
+            <p
+              className="signup-text"
+              style={{ color: "black", fontWeight: "500", fontSize: "14px" }}
+            >
               Don't have an account? <a onClick={toggleForm}>Signup now</a>
             </p>
           </>
@@ -275,7 +277,10 @@ const SignUp = () => {
                 Sign Up
               </button>
             </form>
-            <p className={`signup-text ${isLogin ? "" : "flipped"}`}>
+            <p
+              className={`signup-text ${isLogin ? "" : "flipped"}`}
+              style={{ color: "black", fontWeight: "500", fontSize: "14px" }}
+            >
               Already have an account? <a onClick={toggleForm}>Login now</a>
             </p>
           </>

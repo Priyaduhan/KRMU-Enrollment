@@ -1,24 +1,59 @@
-const NavItem = ({ icon, label, active = false, onClick }) => {
+import React from "react";
+
+const NavItem = ({
+  icon,
+  label,
+  active = false,
+  onClick,
+  isLogout = false,
+}) => {
   return (
     <div
-      className="flex items-center  rounded-lg transition-colors duration-200 cursor-pointer"
       style={{
-        backgroundColor: active ? "#e5e7eb" : "transparent",
-        color: active ? "#1f2937" : "#4b5563",
-        padding: "10px 10px 10px 12px",
-
-        margin: "4px 0",
-        ...(!active && {
+        display: "flex",
+        alignItems: "center",
+        borderRadius: "8px",
+        transition: "all 0.2s ease",
+        cursor: "pointer",
+        padding: "12px 16px",
+        backgroundColor: active ? "#f3f4f6" : "transparent",
+        color: active ? "#111827" : "#4b5563",
+        fontWeight: active ? "600" : "500",
+        ...(!active &&
+          !isLogout && {
+            ":hover": {
+              backgroundColor: "#f3f4f6",
+              color: "#111827",
+            },
+          }),
+        ...(isLogout && {
+          marginTop: "auto",
+          borderTop: "1px solid #e5e7eb",
+          paddingTop: "16px",
+          color: "#ef4444",
           ":hover": {
-            backgroundColor: "#e5e7eb",
-            color: "#1f2937",
+            backgroundColor: "#fee2e2",
           },
         }),
       }}
       onClick={onClick}
     >
-      <div style={{ marginRight: "12px" }}>{icon}</div>{" "}
-      <span className="text-sm font-small" style={{ fontSize: "14px" }}>
+      <div
+        style={{
+          marginRight: "12px",
+          display: "flex",
+          alignItems: "center",
+          color: isLogout ? "#ef4444" : active ? "#4f46e5" : "#6b7280",
+        }}
+      >
+        {React.cloneElement(icon, { size: 20 })}
+      </div>
+      <span
+        style={{
+          fontSize: "14px",
+          letterSpacing: "0.25px",
+        }}
+      >
         {label}
       </span>
     </div>

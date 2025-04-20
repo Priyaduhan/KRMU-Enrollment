@@ -180,7 +180,10 @@ const Dashboard = () => {
         return (
           <>
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+              <h2
+                className="text-4xl font-bold text-gray-800 mb-4 text-center "
+                style={{ marginTop: "10px", fontSize: "28px" }}
+              >
                 Counsellor Dashboard
               </h2>
               <div
@@ -189,7 +192,7 @@ const Dashboard = () => {
                   display: "flex",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginTop: "25px",
+                  marginTop: "30px",
                 }}
               >
                 <StatusCard
@@ -218,7 +221,7 @@ const Dashboard = () => {
 
             <section
               className="my-8"
-              style={{ marginTop: "35px", width: "100%" }}
+              style={{ marginTop: "80px", width: "100%" }}
             >
               <StudentTable
                 students={candidatesWaitingList}
@@ -229,7 +232,7 @@ const Dashboard = () => {
 
             <section
               className="my-8"
-              style={{ marginTop: "35px", width: "100%" }}
+              style={{ marginTop: "65px", width: "100%" }}
             >
               <InterviewedCandidates
                 students={interviewedCandidates}
@@ -268,56 +271,83 @@ const Dashboard = () => {
     currentUser.role === "counsellor" && (
       <div className="min-h-screen flex">
         {/* Sidebar */}
+
         <div
-          className="w-1/6 shadow-lg fixed h-full"
           style={{
+            width: "240px",
+            position: "fixed",
+            height: "100vh",
             backgroundColor: "#ffffff",
             borderRight: "1px solid #e5e7eb",
+            boxShadow: "4px 0 15px rgba(0, 0, 0, 0.02)",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 10,
           }}
         >
-          <div className="p-6" style={{ height: "60%" }}>
-            <h2
-              className="text-2xl font-bold mb-8 my-16"
-              style={{ color: "#1f2937", margin: "20px 0px 15px 12px" }}
+          <div
+            style={{
+              padding: "24px",
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            }}
+          >
+            {/* Logo Section */}
+            <div
+              style={{
+                textAlign: "center",
+                margin: "10px 0 40px",
+                padding: "0 0px",
+              }}
             >
-              <div
+              <img
+                src={uniLogo}
                 style={{
-                  textAlign: "center",
-                  marginTop: "35px",
-                  width: "90%",
-                  height: "100%",
-                  marginBottom: "30px",
+                  width: "100%",
+                  maxWidth: "180px",
+                  height: "auto",
                 }}
-              >
-                <img src={uniLogo} width="100%" alt="University Logo" />
-              </div>
-            </h2>
+                alt="University Logo"
+              />
+            </div>
 
             {/* Navigation Items */}
-            <div className="space-y-4">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                flexGrow: 1,
+              }}
+            >
               <NavItem
-                icon={<Home size={19} />}
+                icon={<Home size={20} />}
                 label="Dashboard"
                 active={activeNav === "dashboard"}
                 onClick={() => setActiveNav("dashboard")}
               />
               <NavItem
-                icon={<Users size={19} />}
+                icon={<Users size={20} />}
                 label="Candidates"
                 active={activeNav === "students"}
                 onClick={() => setActiveNav("students")}
               />
               <NavItem
-                icon={<UserCheck size={19} />}
+                icon={<UserCheck size={20} />}
                 label="Interviewed"
                 active={activeNav === "Teachers"}
                 onClick={() => setActiveNav("Teachers")}
               />
 
+              {/* Spacer to push logout to bottom */}
+              <div style={{ flexGrow: 1 }}></div>
+
               <NavItem
-                icon={<LogOut size={19} />}
+                icon={<LogOut size={20} />}
                 label="Logout"
                 onClick={handleLogout}
+                isLogout={true}
               />
             </div>
           </div>
@@ -327,7 +357,7 @@ const Dashboard = () => {
         <div
           className="w-5/6 p-8 ml-[16.666667%]"
           style={{
-            backgroundColor: "#f9fafb",
+            backgroundColor: "#f0f1f2",
             padding: "20px 60px 00px 30px",
             minHeight: "100vh",
             overflowY: "auto",
