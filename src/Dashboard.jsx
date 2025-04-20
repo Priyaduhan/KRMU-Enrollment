@@ -131,7 +131,6 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await API.post("/auth/logout");
       localStorage.removeItem("token");
       navigate("/counsellor/login");
     } catch (error) {
