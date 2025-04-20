@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "https://krmu-backend.vercel.app/api", // Your backend base URL
+  withCredentials: true,
 });
 
 // Request interceptor to add auth token to requests
