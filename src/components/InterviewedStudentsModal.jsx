@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const InterviewedStudentsModal = ({
   isOpen,
@@ -8,7 +8,26 @@ const InterviewedStudentsModal = ({
   handleReject,
 }) => {
   const modalRef = useRef(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
+  const handleAcceptClick = async () => {
+    setIsAccepting(true);
+    try {
+      await handleAccept();
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleRejectClick = async () => {
+    setIsRejecting(true);
+    try {
+      await handleReject();
+    } finally {
+      setIsRejecting(false);
+    }
+  };
   // Format ISO date to DD-MM-YYYY
   const formatDate = (isoDate) => {
     if (!isoDate) return "Not set";
@@ -46,6 +65,8 @@ const InterviewedStudentsModal = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  const isProcessing = isAccepting || isRejecting;
 
   return (
     <div
@@ -465,7 +486,6 @@ const InterviewedStudentsModal = ({
             </div>
           ))}
 
-          {/* Action Buttons */}
           <div
             style={{
               display: "flex",
@@ -476,44 +496,54 @@ const InterviewedStudentsModal = ({
             }}
           >
             <button
-              onClick={handleReject}
+              onClick={handleRejectClick}
+              disabled={isProcessing}
               style={{
                 padding: "0.4rem 1.25rem",
-                backgroundColor: "#dc2626",
+                backgroundColor: isProcessing ? "#9ca3af" : "#dc2626",
                 color: "white",
                 borderRadius: "0.375rem",
                 border: "none",
-                cursor: "pointer",
+                cursor: isProcessing ? "not-allowed" : "pointer",
                 transition: "background-color 0.2s",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#b91c1c")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#dc2626")
-              }
+              onMouseOver={(e) => {
+                if (!isProcessing) {
+                  e.currentTarget.style.backgroundColor = "#b91c1c";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isProcessing) {
+                  e.currentTarget.style.backgroundColor = "#dc2626";
+                }
+              }}
             >
-              Reject
+              {isRejecting ? "Sending..." : "Reject"}
             </button>
             <button
-              onClick={handleAccept}
+              onClick={handleAcceptClick}
+              disabled={isProcessing}
               style={{
                 padding: "0.4rem 1.25rem",
-                backgroundColor: "#16a34a",
+                backgroundColor: isProcessing ? "#9ca3af" : "#16a34a",
                 color: "white",
                 borderRadius: "0.375rem",
                 border: "none",
-                cursor: "pointer",
+                cursor: isProcessing ? "not-allowed" : "pointer",
                 transition: "background-color 0.2s",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#15803d")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#16a34a")
-              }
+              onMouseOver={(e) => {
+                if (!isProcessing) {
+                  e.currentTarget.style.backgroundColor = "#15803d";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isProcessing) {
+                  e.currentTarget.style.backgroundColor = "#16a34a";
+                }
+              }}
             >
-              Accept
+              {isAccepting ? "Sending..." : "Accept"}
             </button>
           </div>
         </div>
@@ -521,5 +551,4 @@ const InterviewedStudentsModal = ({
     </div>
   );
 };
-
 export default InterviewedStudentsModal;
