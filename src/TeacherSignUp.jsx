@@ -61,11 +61,17 @@ const TeacherSignUp = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     let error = "";
+    // Clean and validate username
+    const cleanedUsername = username.trim().replace(/\s+/g, " ");
+
+    console.log(cleanedUsername);
 
     // Validate username
-    if (!username || !/^[A-Za-z]+$/.test(username)) {
+
+    if (!cleanedUsername || !/^[A-Za-z\s]+$/.test(cleanedUsername)) {
       error = "Username must contain only alphabets.";
     }
+
     // Validate phone number
     else if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
       error = "Phone number must be exactly 10 digits.";
@@ -91,7 +97,7 @@ const TeacherSignUp = () => {
 
     try {
       const { data } = await API.post("/auth/register", {
-        username,
+        username: cleanedUsername,
         phoneNumber,
         email,
         password,

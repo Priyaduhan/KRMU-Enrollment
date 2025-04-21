@@ -476,7 +476,7 @@ const InterviewedStudentsModal = ({
             }}
           >
             <button
-              //   onClick={handleReject}
+              onClick={handleReject}
               style={{
                 padding: "0.4rem 1.25rem",
                 backgroundColor: "#dc2626",
@@ -496,7 +496,7 @@ const InterviewedStudentsModal = ({
               Reject
             </button>
             <button
-              //   onClick={handleAccept}
+              onClick={handleAccept}
               style={{
                 padding: "0.4rem 1.25rem",
                 backgroundColor: "#16a34a",

@@ -138,40 +138,64 @@ const Dashboard = () => {
     }
   };
 
-  const handleAccept = () => {
-    const updatedStudent = {
-      ...selectedStudent,
-      status: "Accepted",
-    };
-    handleUpdateStudent(updatedStudent);
-    closeInterviewedModal();
-    toast.success("Candidate acceptance email sent successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleAccept = async () => {
+    try {
+      const response = await API.post(
+        `/students/${selectedStudent._id}/send-acceptance`
+      );
+
+      closeInterviewedModal();
+
+      toast.success("Acceptance email sent successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      toast.error("Failed to send acceptance email", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
-  const handleReject = () => {
-    const updatedStudent = {
-      ...selectedStudent,
-      status: "Rejected",
-    };
-    handleUpdateStudent(updatedStudent);
-    closeInterviewedModal();
-    toast.success("Candidate rejection email sent successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+  const handleReject = async () => {
+    try {
+      const response = await API.post(
+        `/students/${selectedStudent._id}/send-rejection`
+      );
+
+      closeInterviewedModal();
+
+      toast.success("Rejection email sent successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      toast.error("Failed to send rejection email", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
   const renderContent = () => {

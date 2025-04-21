@@ -29,42 +29,19 @@ const StudentDetailModal = ({
         technicalTeacher: student.technicalTeacher || "",
         generalTeacher: student.generalTeacher || "",
       });
-
-      // // Fetch teachers from backend
-      // const fetchTeachers = async () => {
-      //   try {
-      //     const { data } = await API.get("/users/teachers");
-      //     setTeachers(data.teachers);
-      //   } catch (error) {
-      //     toast.error("Failed to load teachers");
-      //   }
-      // };
-      // fetchTeachers();
     }
   }, [isOpen, student]);
-
-  // const [zoomUrl, setZoomUrl] = useState(selectedStudent?.url || "");
-  // const [mcqTest, setMCQTest] = useState(
-  //   selectedStudent?.mcq?.toString() || ""
-  // );
-  // const [teachnicalInterview, setTeachnicalInterview] = useState(
-  //   selectedStudent?.teachnicalTeacher || ""
-  // );
-  // const [generalInterview, setGeneralInterview] = useState(
-  //   selectedStudent?.generalTeacher || ""
-  // );
-  // const [error, setError] = useState({ mcq: null, url: null });
 
   const [expandedRow, setExpandedRow] = useState(null);
 
   const validateForm = () => {
     const newErrors = {};
 
+    const cleanedzoomLink = formData.zoomLink.trim();
+
     // Validate Teams URL
     if (
-      !formData.zoomLink.startsWith(
-        "https://teams.microsoft.com/l/meetup-join/"
-      )
+      !cleanedzoomLink.startsWith("https://teams.microsoft.com/l/meetup-join/")
     ) {
       newErrors.zoomLink =
         "URL must start with https://teams.microsoft.com/l/meetup-join/";
@@ -105,8 +82,6 @@ const StudentDetailModal = ({
     }
   };
 
-  console.log(errors);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -139,9 +114,6 @@ const StudentDetailModal = ({
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        // setError("");
-        // setZoomUrl("");
-        // setMCQTest(null);
         onClose();
       }
     };
@@ -156,82 +128,6 @@ const StudentDetailModal = ({
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [isOpen, onClose]);
-
-  // const validateTeamsUrl = (url) => {
-  //   const teamsUrlPattern =
-  //     /^https:\/\/teams\.microsoft\.com\/l\/meetup-join\//;
-  //   if (!teamsUrlPattern.test(url)) {
-  //     setError((errors) => ({
-  //       ...errors,
-  //       url: "Microsoft Teams URL must start with https://teams.microsoft.com/l/meetup-join/",
-  //     }));
-  //     return false;
-  //   }
-  //   setError((errors) => ({ ...errors, url: null }));
-  //   return true;
-  // };
-
-  // const validateMCQTestMark = (mark) => {
-  //   if (typeof mark !== "number" || isNaN(mark) || mark < 1 || mark > 100) {
-  //     setError((errors) => ({
-  //       ...errors,
-  //       mcq: "MCQ test marks must be between 1 and 100.",
-  //     }));
-  //     return false;
-  //   }
-  //   setError((errors) => ({ ...errors, mcq: null }));
-  //   return true;
-  // };
-
-  // const handleSubmit = () => {
-  //   const isTeamUrlValid = validateTeamsUrl(zoomUrl);
-  //   const mark = parseFloat(mcqTest);
-  //   const isMCQTestValid = validateMCQTestMark(mark);
-
-  //   if (isTeamUrlValid && isMCQTestValid) {
-  //     try {
-  //       const updatedStudent = {
-  //         ...selectedStudent,
-  //         url: zoomUrl,
-  //         mcq: mark,
-  //         generalTeacher: generalInterview,
-  //         teachnicalTeacher: teachnicalInterview,
-  //         zoomStatus: zoomUrl ? "Added" : "Pending",
-  //       };
-
-  //       const storedStudents =
-  //         JSON.parse(localStorage.getItem("students")) || [];
-  //       const updatedStudents = storedStudents.map((student) =>
-  //         student.id === updatedStudent.id ? updatedStudent : student
-  //       );
-  //       localStorage.setItem("students", JSON.stringify(updatedStudents));
-  //       onUpdateStudent(updatedStudent);
-
-  //       toast.success("Student details updated successfully!", {
-  //         position: "top-right",
-  //         autoClose: 3000,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //       });
-
-  //       // onClose();
-  //     } catch (error) {
-  //       toast.error("Failed to update student details", {
-  //         position: "top-right",
-  //         autoClose: 3000,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //       });
-  //       console.error("Error updating student:", error);
-  //     }
-  //   }
-  // };
 
   const handleCellClick = (content, index) => {
     setExpandedRow(expandedRow === index ? null : index);
