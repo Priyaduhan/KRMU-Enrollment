@@ -228,12 +228,12 @@ const InterviewedCandidates = ({ students, handleViewClick, limit }) => {
                           fontSize: "14px",
                           fontWeight: "500",
                           color:
-                            student.zoomStatus === "Added"
+                            student.emailStatus === "Added"
                               ? "#16a34a"
                               : "#dc2626",
                         }}
                       >
-                        {student.zoomStatus === "Added" ? "Sent" : "Pending"}
+                        {student?.emailStatus === "Added" ? "Sent" : "Pending"}
                       </td>
                       <td
                         style={{
