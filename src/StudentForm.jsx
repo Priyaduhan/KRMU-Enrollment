@@ -105,13 +105,13 @@ const StudentForm = () => {
     },
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("You need to login first");
-      navigate("/counsellor/login");
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     toast.error("You need to login first");
+  //     navigate("/counsellor/login");
+  //   }
+  // }, []);
 
   return (
     <div
