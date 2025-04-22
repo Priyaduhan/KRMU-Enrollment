@@ -241,3 +241,12 @@ a:hover {
   margin-bottom: 1rem;
   text-align: center;
 }
+.form-student {
+  width: 50%;
+}
+
+@media (max-width: 800px) {
+  .form-student {
+    width: 90%;
+  }
+}

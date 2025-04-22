@@ -127,8 +127,9 @@ const StudentForm = () => {
     >
       <form
         onSubmit={formik.handleSubmit}
+        className="form-student"
         style={{
-          width: "50%",
+          // width: "50%",
           padding: "2rem",
           backgroundColor: "white",
           borderRadius: "10px",
