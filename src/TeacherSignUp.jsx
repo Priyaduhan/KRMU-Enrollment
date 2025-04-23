@@ -283,6 +283,40 @@ const TeacherSignUp = () => {
             </p>
           </>
         )}
+        <div
+          className={`${isLogin ? "" : "flipped"}`}
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-around",
+            padding: "auto",
+          }}
+        >
+          <button
+            onClick={() => navigate("/counsellor/login")}
+            style={{
+              backgroundColor: "#16A34A",
+              width: "55%",
+              color: "white",
+              padding: "15px 20px",
+              borderRadius: "0.75rem",
+              fontSize: "0.9rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              border: "none",
+              transition: "background-color 0.3s ease",
+              textAlign: "center",
+            }}
+            // onMouseOver={(e) =>
+            //   (e.currentTarget.style.backgroundColor = "#1D4ED8")
+            // }
+            // onMouseOut={(e) =>
+            //   (e.currentTarget.style.backgroundColor = "#2563EB")
+            // }
+          >
+            Login As Counsellor
+          </button>
+        </div>
       </div>
     </div>
   );
